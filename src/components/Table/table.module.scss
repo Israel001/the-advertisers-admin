@@ -1,0 +1,54 @@
+%rowHover {
+  background: rgba(57, 167, 251, 0.1);
+}
+
+.table {
+  width: 100%;
+  overflow-x: auto;
+
+  td,
+  th {
+    padding: 12px 20px;
+    white-space: nowrap;
+  }
+
+  tr {
+    background-color: white;
+  }
+
+  tr:last-child {
+    td {
+      border-bottom: none;
+    }
+  }
+
+  tr:hover {
+    @extend %rowHover;
+  }
+
+  tr:nth-child(2n + 1) {
+    background-color: rgb(222, 247, 255);
+  }
+
+  tr:nth-child(2n + 1):hover {
+    @extend %rowHover;
+  }
+
+  th {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    color: #17233d;
+    background: rgb(235, 230, 230);
+  }
+
+  td {
+    color: #0c0c0d;
+    font-size: 11px;
+    line-height: 16px;
+  }
+  thead {
+    cursor: pointer;
+    background: white;
+  }
+}

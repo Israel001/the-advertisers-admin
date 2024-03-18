@@ -1,0 +1,361 @@
+%activeLink {
+  background: rgba(255, 255, 255, 0.282);
+  border-left: 3px solid white !important;
+  color: white;
+  font-weight: bold !important;
+}
+
+%padFix {
+  height: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.backItem {
+  border-bottom: 0.5px solid white !important;
+  margin-bottom: 30px;
+  p {
+    margin-left: 12px;
+  }
+}
+
+.wrapper {
+  position: absolute;
+  font-family: Supreme-Regular !important;
+}
+
+.container {
+  position: relative;
+}
+
+.loader {
+  margin: 30% 5%;
+}
+
+.collectionId {
+  font-weight: 500;
+  font-size: 14.5px;
+  line-height: 19px;
+  text-align: left !important;
+  color: #cdcccc;
+  margin-top: 12px;
+  margin-left: 0px !important;
+}
+
+.sidebar {
+  background: blue;
+  width: 200px;
+  height: 100%;
+  padding: 25px 0px 50px;
+  padding-top: 0;
+  margin-top: -65px;
+  border-right-width: 1px;
+  border-right-color: gray;
+  position: fixed;
+  top: 133px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-transition: width 0.3s linear;
+  transition: width 0.3s linear;
+  transition-delay: 0.15s;
+  z-index: 10;
+  > li {
+    > div {
+      padding-left: 10px;
+    }
+  }
+
+  & > div:last-child {
+    margin-bottom: 100px;
+  }
+  .unavailableText {
+    padding: 0 20px;
+    line-height: 22px;
+    color: white;
+  }
+}
+
+.sidebarHeader {
+  background: #142155;
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  .statusAndToggle {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 60% 15%;
+    grid-gap: 15%;
+
+    .toggleSwitchWrapper {
+      display: flex;
+      > div {
+        margin-right: 6px;
+      }
+      .toggleText {
+        color: white;
+        display: inline-block;
+        margin-top: 8px;
+      }
+    }
+  }
+  & > button {
+    background: rgba(255, 255, 255, 0.44);
+    outline: none;
+    border: none;
+    border-radius: 20px;
+    padding: 2px 5px;
+    color: #142155;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  & > div:first-of-type {
+    color: #fff;
+    margin-top: 0.8rem;
+    padding-left: 0;
+    text-align: center !important;
+  }
+
+  & > div:last-of-type {
+    margin-top: 0.8rem;
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 400;
+    align-items: center;
+
+    & > div {
+      margin: 0 10px;
+
+      & span {
+        background: none;
+      }
+    }
+  }
+}
+
+.textAndIconPane {
+  display: grid !important;
+  grid-template-columns: 90% 10% !important;
+}
+
+.itemContainer {
+  &:first-of-type {
+    margin-top: 20px;
+  }
+}
+
+.sidebarItem {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  color: white;
+  padding: 15px 25px;
+  border-left: solid 3px transparent;
+  cursor: pointer;
+  -webkit-transition: 0.1s linear;
+  transition: 0.1s linear;
+}
+
+.sidebarItem:hover {
+  @extend %activeLink;
+}
+
+.customPadding {
+  margin-left: -17px !important;
+}
+
+.greyedOut {
+  /* for API servives that are not available yet*/
+  display: none !important;
+}
+
+.activeLinkSideBar {
+  @extend %activeLink;
+}
+
+.menuLogo {
+  width: 190px;
+  padding: 0px 15px 50px;
+  cursor: pointer;
+}
+
+.lastCategoryItemPadFix {
+  margin-bottom: 20px !important;
+}
+
+.logoArea {
+  display: grid;
+  grid-template-columns: 65% 35%;
+  cursor: pointer;
+  align-items: center;
+  align-content: center;
+  width: 190px;
+  padding: 60px 10px 50px;
+
+  > h3 {
+    font-weight: 600;
+    font-size: 16px;
+    margin-left: 5px;
+    color: white;
+  }
+}
+
+.divider {
+  border-bottom: 1px solid gray;
+  padding: 0px;
+  margin-bottom: 25px;
+  padding-top: 0px;
+}
+
+.apiLogsIcon {
+  padding: 15px 0px 15px 27px;
+  cursor: pointer;
+  margin-bottom: 3vh;
+  > svg {
+    path {
+      fill: white !important;
+    }
+  }
+
+  &:hover {
+    @extend %activeLink;
+  }
+}
+
+.collapseArrow {
+  float: right;
+  margin-top: 1vh;
+  padding-right: 25px;
+
+  > svg {
+    cursor: pointer;
+    path {
+      fill: white;
+    }
+  }
+}
+
+.collapseArrowCollapsed {
+  margin-top: 21vh !important;
+}
+
+.listItem {
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  svg {
+    margin-right: 12px;
+  }
+}
+
+.collapsed {
+  width: 80px;
+  overflow-y: hidden;
+  padding-top: 45px !important;
+  .listItemPane {
+    display: none !important;
+
+    span {
+      text-overflow: ellipsis !important;
+    }
+  }
+
+  .showSubmenuIcon {
+    display: block;
+  }
+}
+
+.hideSubMenuIcons {
+  display: none;
+}
+
+.subMenuArrow {
+  margin-left: 50px;
+  display: inline-block;
+}
+
+.customSubMenuArrowMargin {
+  margin-left: 58px !important;
+}
+
+.padSubmenuText {
+  margin-left: 60px !important;
+}
+
+.hideSubMenu {
+  display: none;
+}
+
+.subMenu {
+  -webkit-transition: width 0.3s linear;
+  transition: width 0.3s linear;
+  display: block;
+  .subMenuListText {
+    padding-left: 7px;
+    word-wrap: none;
+  }
+}
+
+.dropDownBackground {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.apiLogs {
+  padding: 5px 0px 15px 30px;
+}
+
+.regionSelector {
+  margin-left: 10px;
+}
+
+.menuList {
+  overflow-y: auto;
+}
+
+.regionIndicator {
+  display: grid;
+  background-color: blue;
+  position: fixed;
+  grid-template-columns: 13% 83%;
+  grid-gap: 4%;
+  width: 270px;
+  height: 50px !important;
+  align-items: center;
+  margin-left: 25%;
+  padding: 0px 0px 0px 60px;
+  bottom: 0px;
+  left: -25%;
+  z-index: 18;
+
+  h5 {
+    color: white;
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+}
+
+%commonBadge {
+  display: inline-block;
+  width: 77px;
+  height: auto;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-align: center !important;
+  margin-left: -40px !important;
+  margin-top: 10px;
+  font-size: 10px;
+}
+
+.unpublishedBadge {
+  @extend %commonBadge;
+  background: skyblue !important;
+  color: blue !important;
+}
+
+.publishedBadge {
+  @extend %commonBadge;
+  background: green !important;
+  color: white !important;
+}

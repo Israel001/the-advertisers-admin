@@ -1,0 +1,33 @@
+// src/CollapsibleAccordion.module.scss
+.collapsible {
+    border: 1px solid #6c757d;
+    margin-bottom: 10px;
+  
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      cursor: pointer;
+  
+      &__arrow {
+        transition: transform 0.3s;
+      }
+    }
+  
+    &__content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out;
+    }
+  
+    &.open {
+      .collapsible__header__arrow {
+        transform: rotate(180deg);
+      }
+  
+      .collapsible__content {
+        max-height: 500px; /* Set an appropriate max height for your content */
+      }
+    }
+  }
+  

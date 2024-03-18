@@ -1,0 +1,137 @@
+.fullPage {
+  width: 100vw;
+  min-height: 100vh;
+  .main {
+    min-height: calc(100vh - 70px);
+    padding: 30px 30px 0px 30px;
+  }
+}
+
+.formModal {
+  position: relative;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 500px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+  .close {
+    position: absolute;
+    cursor: pointer;
+    right: 20px;
+    top: 20px;
+    background: none;
+    border: none;
+  }
+
+  .header {
+    text-align: center;
+    font-size: 20px;
+    line-height: 22px;
+    font-weight: 600;
+    margin: 20px 0;
+  }
+
+  .formGroup {
+    margin-bottom: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input[type='text'] {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  .btnContainer {
+    text-align: center;
+    button[type='submit'] {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  }
+}
+
+.customSelect {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  width: 100%;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background-color: #0056b3;
+  color: white;
+}
+
+.pageHeader {
+  margin-bottom: 20px;
+}
+
+.createBtnContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+%modal {
+  max-width: 550px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.pricingApproveModal {
+  @extend %modal;
+
+  h2 {
+    margin-bottom: 20px;
+  }
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.button {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  text-align: center;
+  transition: background-color 0.3s, color 0.3s;
+  background-color: #0056b3;
+  color: #fff;
+  border: none;
+
+  &:hover {
+    opacity: 0.9;
+  }
+  &:disabled {
+    background-color: #f2f2f2;
+    color: #999999;
+    cursor: not-allowed;
+  }
+}

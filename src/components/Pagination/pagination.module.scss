@@ -1,0 +1,43 @@
+%navigation {
+    padding: 5px 10px;
+  }
+  
+  .paginationContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    > span {
+      cursor: pointer;
+    }
+  }
+  
+  .navigation {
+    @extend %navigation;
+    cursor: pointer;
+  }
+  
+  .ellipse {
+    margin: auto 10px;
+  }
+  
+  .navDisabled {
+    @extend %navigation;
+    opacity: 0.3;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+  
+  .paginationCount {
+    color: rgb(168, 168, 168);
+  }
+  
+  .highlightedPage {
+    color: blue;
+    border: 1px solid blue;
+    border-radius: 5px;
+  }
