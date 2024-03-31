@@ -143,7 +143,11 @@ const Product = () => {
                 }}
                 style={{ cursor: 'pointer' }}
               >
-                <td>{row.name}</td>
+                <td>
+                  {row.name.length > 20
+                    ? `${row.name.substring(20)}...`
+                    : row.name}
+                </td>
                 <td>
                   {
                     <img
@@ -168,8 +172,16 @@ const Product = () => {
                     row.price
                   )}
                 </td>
-                <td>{row.brand}</td>
-                <td>{row.createdBy.name}</td>
+                <td>
+                  {row.brand.length > 20
+                    ? `${row.brand.substring(20)}...`
+                    : row.brand}
+                </td>
+                <td>
+                  {row.store.storeName.length > 20
+                    ? `${row.store.storeName.substring(20)}...`
+                    : row.store.storeName}
+                </td>
                 <td>{row.createdAt}</td>
                 <td>
                   <div>

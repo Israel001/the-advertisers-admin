@@ -131,8 +131,16 @@ const SubCategory = () => {
             return (
               <tr key={index}>
                 <td>{row.id}</td>
-                <td>{row.name}</td>
-                <td>{row.mainCategory.name}</td>
+                <td>
+                  {row.name.length > 20
+                    ? `${row.name.substring(20)}...`
+                    : row.name}
+                </td>
+                <td>
+                  {row.mainCategory.name.length > 20
+                    ? `${row.mainCategory.name.substring(20)}...`
+                    : row.mainCategory.name}
+                </td>
                 <td>
                   {
                     <img
@@ -141,7 +149,11 @@ const SubCategory = () => {
                     />
                   }
                 </td>
-                <td>{row.description}</td>
+                <td>
+                  {row.description.length > 20
+                    ? `${row.description.substring(20)}...`
+                    : row.description}
+                </td>
                 <td>{row.createdAt}</td>
                 <td>
                   <div>
