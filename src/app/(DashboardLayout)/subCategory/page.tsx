@@ -133,12 +133,12 @@ const SubCategory = () => {
                 <td>{row.id}</td>
                 <td>
                   {row.name.length > 20
-                    ? `${row.name.substring(20)}...`
+                    ? `${row.name.substring(0, 20)}...`
                     : row.name}
                 </td>
                 <td>
                   {row.mainCategory.name.length > 20
-                    ? `${row.mainCategory.name.substring(20)}...`
+                    ? `${row.mainCategory.name.substring(0, 20)}...`
                     : row.mainCategory.name}
                 </td>
                 <td>
@@ -151,7 +151,7 @@ const SubCategory = () => {
                 </td>
                 <td>
                   {row.description.length > 20
-                    ? `${row.description.substring(20)}...`
+                    ? `${row.description.substring(0, 20)}...`
                     : row.description}
                 </td>
                 <td>{row.createdAt}</td>
