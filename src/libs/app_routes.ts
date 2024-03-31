@@ -4,4 +4,5 @@ export class ServerRoutes {
   static getProductData = `${this.baseUrl}/product`;
   static getCategoriesData = `${this.baseUrl}/categories`;
   static getMainCategoriesData = `${this.baseUrl}/main-categories`;
+  static getAdminData = `${this.baseUrl}/fetch-admins`;
 }

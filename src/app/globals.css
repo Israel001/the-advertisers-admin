@@ -131,7 +131,11 @@ a {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 5px 5px 0 0;
-  background: linear-gradient(to bottom, #007bff 0%, #0056b3 100%); /* Gradient background */
+  background: linear-gradient(
+    to bottom,
+    #007bff 0%,
+    #0056b3 100%
+  ); /* Gradient background */
   color: #fff; /* Text color */
   font-family: 'Arial', sans-serif; /* Custom font */
   transition: background-color 0.9s;
@@ -154,3 +158,6 @@ a {
   margin-top: -1px;
 }
 
+.slick-slide {
+  margin-right: 1rem !important;
+}

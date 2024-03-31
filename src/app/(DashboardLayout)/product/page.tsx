@@ -22,6 +22,8 @@ const Product = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productSelected, setProductSelected] = useState<number>();
   const [forceRefresh, setForceRefresh] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [product, setProduct] = useState<IProductData>();
 
   const { setProductData, productData } = useAppContext();
 
@@ -134,7 +136,13 @@ const Product = () => {
           data={productData}
           renderRow={(row: IProductData, index: number) => {
             return (
-              <tr key={index}>
+              <tr
+                key={index}
+                onClick={() => {
+                  router.push(`/productDetail?id=${row.id}`);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 <td>{row.name}</td>
                 <td>
                   {
@@ -147,7 +155,7 @@ const Product = () => {
                 <td>{row.quantity}</td>
                 <td>{row.published ? 'Published' : 'Unpublished'}</td>
                 <td>
-                  {row.discountPrice > 0 ? (
+                  {parseFloat(row.discountPrice) > 0 ? (
                     <span>
                       <span style={{ textDecoration: 'line-through' }}>
                         {row.price}
@@ -173,6 +181,11 @@ const Product = () => {
                         textDecoration: 'underline',
                         cursor: 'pointer',
                       }}
+                      onClick={() => {
+                        setShowModal(true);
+                        setProduct(row);
+                        setIsEditMode(true);
+                      }}
                     >
                       Edit
                     </span>
@@ -196,7 +209,12 @@ const Product = () => {
           }}
         />
       )}
-      <CreateProduct showModal={showModal} setShowModal={setShowModal} />
+      <CreateProduct
+        showModal={showModal}
+        setShowModal={setShowModal}
+        isEditMode={isEditMode}
+        product={product}
+      />
       <Modal
         isOpen={showDeleteModal}
         onCloseModal={() => setShowDeleteModal(false)}

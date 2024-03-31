@@ -23,6 +23,8 @@ const MainCategory = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categorySelected, setCategorySelected] = useState<number>();
   const [forceRefresh, setForceRefresh] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [mainCategory, setMainCategory] = useState<ICategory>();
 
   const { setMainCategoryData, mainCategoryData } = useAppContext();
 
@@ -146,6 +148,11 @@ const MainCategory = () => {
                         textDecoration: 'underline',
                         cursor: 'pointer',
                       }}
+                      onClick={() => {
+                        setShowModal(true);
+                        setMainCategory(row);
+                        setIsEditMode(true);
+                      }}
                     >
                       Edit
                     </span>
@@ -169,7 +176,12 @@ const MainCategory = () => {
           }}
         />
       )}
-      <CreateMainCategory showModal={showModal} setShowModal={setShowModal} />
+      <CreateMainCategory
+        showModal={showModal}
+        setShowModal={setShowModal}
+        isEditMode={isEditMode}
+        mainCategory={mainCategory}
+      />
       <Modal
         isOpen={showDeleteModal}
         onCloseModal={() => setShowDeleteModal(false)}

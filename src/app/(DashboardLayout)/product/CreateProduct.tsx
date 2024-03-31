@@ -7,32 +7,100 @@ import { ServerRoutes } from '@/libs/app_routes';
 import { useRouter } from 'next/navigation';
 import ToggleSwitch from '@/components/ToggleSwitch/ToggleSwitch';
 import { Editor } from '@tinymce/tinymce-react';
-import { ICategory } from '@/types/shared';
+import { ICategory, IProductData } from '@/types/shared';
 
 export interface ICreateProductProps {
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
+  isEditMode: boolean;
+  product?: IProductData;
 }
 
-const CreateProduct = ({ showModal, setShowModal }: ICreateProductProps) => {
+const CreateProduct = ({
+  showModal,
+  setShowModal,
+  isEditMode,
+  product,
+}: ICreateProductProps) => {
   const router = useRouter();
 
-  const [productName, setProductName] = useState('');
-  const [productQuantity, setProductQuantity] = useState('');
-  const [outOfStock, setOutOfStock] = useState(false);
-  const [productPrice, setProductPrice] = useState('');
-  const [discountPrice, setDiscountPrice] = useState('');
-  const [brand, setBrand] = useState('');
-  const [description, setDescription] = useState('');
-  const [published, setPublished] = useState(true);
+  const [productName, setProductName] = useState(
+    isEditMode ? product!.name : '',
+  );
+  const [productQuantity, setProductQuantity] = useState(
+    isEditMode ? product!.quantity.toString() : '',
+  );
+  const [outOfStock, setOutOfStock] = useState(
+    isEditMode ? product!.outOfStock : false,
+  );
+  const [productPrice, setProductPrice] = useState(
+    isEditMode ? product!.price : '',
+  );
+  const [discountPrice, setDiscountPrice] = useState(
+    isEditMode ? product!.discountPrice : '',
+  );
+  const [brand, setBrand] = useState(isEditMode ? product!.brand : '');
+  const [description, setDescription] = useState(
+    isEditMode ? product!.description : '',
+  );
+  const [published, setPublished] = useState(
+    isEditMode ? product!.published : true,
+  );
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [mainCategories, setMainCategories] = useState<ICategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedMainCategory, setSelectedMainCategory] = useState('');
-  const [featuredImage, setFeaturedImage] = useState<Blob>();
+  const [selectedCategory, setSelectedCategory] = useState(
+    isEditMode ? product!.category.id.toString() : '',
+  );
+  const [selectedMainCategory, setSelectedMainCategory] = useState(
+    isEditMode ? product!.mainCategory.id.toString() : '',
+  );
+  const [featuredImage, setFeaturedImage] = useState<Blob | string | undefined>(
+    isEditMode
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/${product!.featuredImage}`
+      : undefined,
+  );
   const [featuredImageForBackend, setFeaturedImageForBackend] =
     useState<Blob>();
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(
+    isEditMode
+      ? product!.images
+          .split(',')
+          .map((image) => `${process.env.NEXT_PUBLIC_BACKEND_URL}/${image}`)
+      : [],
+  );
+
+  useEffect(() => {
+    if (product) {
+      setProductName(product.name);
+      setProductQuantity(product.quantity.toString());
+      setOutOfStock(product.outOfStock);
+      setProductPrice(product.price);
+      setDiscountPrice(product.discountPrice);
+      setBrand(product.brand);
+      setDescription(product.description);
+      setPublished(product.published);
+      setSelectedCategory(product.category.id.toString());
+      setSelectedMainCategory(product.mainCategory.id.toString());
+      setFeaturedImage(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${product!.featuredImage}`,
+      );
+      setImages(
+        product!.images
+          .split(',')
+          .map((image) => `${process.env.NEXT_PUBLIC_BACKEND_URL}/${image}`),
+      );
+      setProductNameError('');
+      setProductQuantityError('');
+      setProductPriceError('');
+      setDiscountPriceError('');
+      setBrandError('');
+      setCategoryError('');
+      setMainCategoryError('');
+      setFeaturedImageError('');
+      setImagesError('');
+    }
+  }, [product]);
+
   const [imagesForBackend, setImagesForBackend] = useState<Blob[]>([]);
   const [productNameError, setProductNameError] = useState(
     'Product name is required',
@@ -168,7 +236,8 @@ const CreateProduct = ({ showModal, setShowModal }: ICreateProductProps) => {
       const formData = new FormData();
       formData.append('mainCategoryId', selectedMainCategory);
       formData.append('categoryId', selectedCategory);
-      formData.append('featuredImage', featuredImageForBackend!);
+      if (featuredImageForBackend)
+        formData.append('featuredImage', featuredImageForBackend!);
       formData.append('name', productName);
       formData.append('quantity', productQuantity);
       formData.append('outOfStock', String(outOfStock));
@@ -179,29 +248,52 @@ const CreateProduct = ({ showModal, setShowModal }: ICreateProductProps) => {
         formData.append('description', desc);
       }
       formData.append('brand', brand);
-      imagesForBackend.forEach((image) => {
-        formData.append('images', image);
-      });
-      formData.append('published', String(published));
-      axios
-        .post(ServerRoutes.getProductData, formData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        })
-        .then(() => {
-          window.location.reload();
-        })
-        .catch((error) => {
-          if (error.response?.data?.statusCode === 401) {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('user');
-            localStorage.removeItem('date');
-            router.push('/');
-          } else {
-            alert(error.response?.data?.message);
-          }
+      if (imagesForBackend.length)
+        imagesForBackend.forEach((image) => {
+          formData.append('images', image);
         });
+      formData.append('published', String(published));
+      if (isEditMode) {
+        axios
+          .put(`${ServerRoutes.getProductData}/${product!.id}`, formData, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          })
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => {
+            if (error.response?.data?.statusCode === 401) {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('user');
+              localStorage.removeItem('date');
+              router.push('/');
+            } else {
+              alert(error.response?.data?.message);
+            }
+          });
+      } else {
+        axios
+          .post(ServerRoutes.getProductData, formData, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          })
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => {
+            if (error.response?.data?.statusCode === 401) {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('user');
+              localStorage.removeItem('date');
+              router.push('/');
+            } else {
+              alert(error.response?.data?.message);
+            }
+          });
+      }
     }
   };
 

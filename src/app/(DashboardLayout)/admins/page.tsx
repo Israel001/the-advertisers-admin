@@ -6,41 +6,34 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import styles from '../product/product.module.scss';
-import SearchComponent from '@/components/Filter/Filter';
 import { PlusCircledIcon } from '@radix-ui/react-icons';
 import Table from '@/components/Table/Table';
-import { ICategory } from '@/types/shared';
+import { IAdmin, ICategory } from '@/types/shared';
 import { Modal } from '@/components/Modal/Modal';
-import withSubCategoryContext from './withSubCategoryContext';
-import CreateSubCategory from './CreateSubCategory';
+import withAdminContext from './withAdminContext';
+import CreateAdmin from './CreateAdmin';
 
-const SubCategory = () => {
+const Admin = () => {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [categorySelected, setCategorySelected] = useState<number>();
+  const [adminSelected, setAdminSelected] = useState<number>();
   const [forceRefresh, setForceRefresh] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [subCategory, setSubCategory] = useState<ICategory>();
 
-  const { setSubCategoryData, subCategoryData } = useAppContext();
+  const { setAdminData, adminData } = useAppContext();
 
   useEffect(() => {
     setLoading(true);
-    let url = `${ServerRoutes.getCategoriesData}?pagination[page]=${page}&pagination[limit]=50`;
-    if (searchQuery) {
-      url = `${url}&search=${searchQuery}`;
-    }
+    let url = `${ServerRoutes.getAdminData}`;
     axios
       .get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       })
-      .then((response) => setSubCategoryData(response.data))
+      .then((response) => setAdminData(response.data))
       .catch((error) => {
         if (error.response?.data?.statusCode === 401) {
           localStorage.removeItem('accessToken');
@@ -50,19 +43,17 @@ const SubCategory = () => {
         }
       });
     setLoading(false);
-    setForceRefresh(false);
-  }, [searchQuery, page, forceRefresh]);
+  }, [forceRefresh]);
 
-  const deleteSubCategory = async () => {
+  const deleteAdmin = async () => {
     const accessToken = localStorage.getItem('accessToken');
     await axios
-      .delete(`${ServerRoutes.baseUrl}/sub-category/${categorySelected}`, {
+      .delete(`${ServerRoutes.baseUrl}/${adminSelected}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
       .then(() => {
-        setPage(1);
         setForceRefresh(true);
       })
       .catch((error) => {
@@ -77,19 +68,13 @@ const SubCategory = () => {
 
   return (
     <div>
-      <h2 className={styles.pageHeader}>Sub Category</h2>
-      <div style={{ marginBottom: '20px' }}>
-        <SearchComponent
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-      </div>
+      <h2 className={styles.pageHeader}>Admins</h2>
       <div className={styles.createBtnContainer}>
         <button
           className={styles.createButton}
           onClick={() => setShowModal(true)}
         >
-          <PlusCircledIcon /> Create Sub Category
+          <PlusCircledIcon /> Create Admin
         </button>
       </div>
       {loading ? (
@@ -99,68 +84,35 @@ const SubCategory = () => {
           headers={[
             {
               id: 1,
-              label: 'Category Id',
+              label: 'Id',
             },
             {
               id: 2,
-              label: 'Category Name',
+              label: 'Full Name',
             },
             {
               id: 3,
-              label: 'Main Category Name',
+              label: 'Email',
             },
             {
               id: 4,
-              label: 'Category Image',
+              label: 'Created At',
             },
             {
               id: 5,
-              label: 'Category Description',
-            },
-            {
-              id: 6,
-              label: 'Date Created',
-            },
-            {
-              id: 7,
               label: 'Actions',
             },
           ]}
-          data={subCategoryData}
-          renderRow={(row: ICategory, index: number) => {
+          data={adminData}
+          renderRow={(row: IAdmin, index: number) => {
             return (
               <tr key={index}>
                 <td>{row.id}</td>
-                <td>{row.name}</td>
-                <td>{row.mainCategory.name}</td>
-                <td>
-                  {
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${row.featuredImage}`}
-                      style={{ height: '50px' }}
-                    />
-                  }
-                </td>
-                <td>{row.description}</td>
+                <td>{row.fullName}</td>
+                <td>{row.email}</td>
                 <td>{row.createdAt}</td>
                 <td>
                   <div>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        marginRight: '1rem',
-                        color: 'blue',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        setShowModal(true);
-                        setSubCategory(row);
-                        setIsEditMode(true);
-                      }}
-                    >
-                      Edit
-                    </span>
                     <span
                       style={{
                         color: 'red',
@@ -168,7 +120,7 @@ const SubCategory = () => {
                         cursor: 'pointer',
                       }}
                       onClick={() => {
-                        setCategorySelected(row.id);
+                        setAdminSelected(row.id);
                         setShowDeleteModal(true);
                       }}
                     >
@@ -181,12 +133,7 @@ const SubCategory = () => {
           }}
         />
       )}
-      <CreateSubCategory
-        showModal={showModal}
-        setShowModal={setShowModal}
-        isEditMode={isEditMode}
-        subCategory={subCategory}
-      />
+      <CreateAdmin showModal={showModal} setShowModal={setShowModal} />
       <Modal
         isOpen={showDeleteModal}
         onCloseModal={() => setShowDeleteModal(false)}
@@ -194,12 +141,12 @@ const SubCategory = () => {
       >
         {showDeleteModal && (
           <div className={styles.pricingApproveModal}>
-            <h2>Are you sure you want to delete this category?</h2>
+            <h2>Are you sure you want to delete this admin?</h2>
             <div className={styles['button-container']}>
               <button
                 className={`${styles.button} ${styles.yes}`}
                 onClick={() => {
-                  deleteSubCategory();
+                  deleteAdmin();
                   setShowDeleteModal(false);
                 }}
                 style={{ backgroundColor: '#f44336' }}
@@ -220,4 +167,4 @@ const SubCategory = () => {
   );
 };
 
-export default withSubCategoryContext(SubCategory);
+export default withAdminContext(Admin);

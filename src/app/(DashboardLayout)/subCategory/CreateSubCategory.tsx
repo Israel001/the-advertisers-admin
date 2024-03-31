@@ -10,11 +10,15 @@ import { ICategory } from '@/types/shared';
 export interface ICreateSubCategoryProps {
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
+  isEditMode: boolean;
+  subCategory?: ICategory;
 }
 
 const CreateSubCategory = ({
   showModal,
   setShowModal,
+  isEditMode,
+  subCategory,
 }: ICreateSubCategoryProps) => {
   const router = useRouter();
 
@@ -25,7 +29,9 @@ const CreateSubCategory = ({
   const [descriptionError, setDescriptionError] = useState(
     'Category description is required',
   );
-  const [featuredImage, setFeaturedImage] = useState<Blob>();
+  const [featuredImage, setFeaturedImage] = useState<
+    Blob | string | undefined
+  >();
   const [featuredImageForBackend, setFeaturedImageForBackend] =
     useState<Blob>();
   const [featuredImageError, setFeaturedImageError] = useState(
@@ -35,6 +41,21 @@ const CreateSubCategory = ({
     'Main category is required',
   );
   const [mainCategories, setMainCategories] = useState<ICategory[]>([]);
+
+  useEffect(() => {
+    if (subCategory) {
+      setName(subCategory.name);
+      setDescription(subCategory.description);
+      setFeaturedImage(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${subCategory!.featuredImage}`,
+      );
+      setSelectedMainCategory(subCategory.mainCategory.id.toString());
+      setNameError('');
+      setDescriptionError('');
+      setFeaturedImageError('');
+      setMainCategoryError('');
+    }
+  }, [subCategory]);
 
   const fetchMainCategories = async () => {
     const accessToken = localStorage.getItem('accessToken');
@@ -103,30 +124,57 @@ const CreateSubCategory = ({
       const formData = new FormData();
       formData.append('name', name);
       formData.append('description', description);
-      formData.append('featuredImage', featuredImageForBackend!);
-      axios
-        .post(
-          `${ServerRoutes.baseUrl}/category/${selectedMainCategory}/subCategory`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      if (featuredImageForBackend)
+        formData.append('featuredImage', featuredImageForBackend!);
+      if (isEditMode) {
+        axios
+          .put(
+            `${ServerRoutes.baseUrl}/category/${subCategory!.id}`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+              },
             },
-          },
-        )
-        .then(() => {
-          window.location.reload();
-        })
-        .catch((error) => {
-          if (error.response?.data?.statusCode === 401) {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('user');
-            localStorage.removeItem('date');
-            router.push('/');
-          } else {
-            alert(error.response?.data?.message);
-          }
-        });
+          )
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => {
+            if (error.response?.data?.statusCode === 401) {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('user');
+              localStorage.removeItem('date');
+              router.push('/');
+            } else {
+              alert(error.response?.data?.message);
+            }
+          });
+      } else {
+        axios
+          .post(
+            `${ServerRoutes.baseUrl}/category/${selectedMainCategory}/subCategory`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+              },
+            },
+          )
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => {
+            if (error.response?.data?.statusCode === 401) {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('user');
+              localStorage.removeItem('date');
+              router.push('/');
+            } else {
+              alert(error.response?.data?.message);
+            }
+          });
+      }
     }
   };
 

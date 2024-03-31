@@ -21,6 +21,11 @@ let sidebarItems = [
     href: '/subCategory',
     subMenu: [],
   },
+  {
+    name: 'Admins',
+    href: '/admins',
+    subMenu: [],
+  },
 ];
 
 const Header: React.FC = () => {
