@@ -1,14 +1,13 @@
 import { Modal } from '@/components/Modal/Modal';
 import styles from '../product/product.module.scss';
 import { Cross1Icon } from '@radix-ui/react-icons';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, ComponentType, MutableRefObject, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { ServerRoutes } from '@/libs/app_routes';
 import { useRouter } from 'next/navigation';
 import ToggleSwitch from '@/components/ToggleSwitch/ToggleSwitch';
 import { ICategory, IProductData } from '@/types/shared';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import dynamic from 'next/dynamic';
 
 export interface ICreateProductProps {
   showModal: boolean;
@@ -24,6 +23,13 @@ const CreateProduct = ({
   product,
 }: ICreateProductProps) => {
   const router = useRouter();
+
+  const CustomEditor: ComponentType<{
+    description: string;
+    editorRef: MutableRefObject<any>;
+  }> = dynamic(() => import('../../../components/CustomEditor') as any, {
+    ssr: false,
+  });
 
   const [productName, setProductName] = useState(
     isEditMode ? product!.name : '',
@@ -517,12 +523,9 @@ const CreateProduct = ({
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="description">Description:</label>
-            <CKEditor
-              editor={ClassicEditor}
-              data={description}
-              onReady={(editor) => {
-                editorRef.current = editor;
-              }}
+            <CustomEditor
+              description={description}
+              editorRef={editorRef}
             />
           </div>
           <div className={styles.formGroup}>
