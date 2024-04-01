@@ -86,7 +86,11 @@ const Product = () => {
       <div className={styles.createBtnContainer}>
         <button
           className={styles.createButton}
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setIsEditMode(false);
+            setProduct(null as any);
+            setShowModal(true);
+          }}
         >
           <PlusCircledIcon /> Create Product
         </button>
@@ -193,7 +197,9 @@ const Product = () => {
                         textDecoration: 'underline',
                         cursor: 'pointer',
                       }}
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         setShowModal(true);
                         setProduct(row);
                         setIsEditMode(true);
@@ -207,7 +213,9 @@ const Product = () => {
                         textDecoration: 'underline',
                         cursor: 'pointer',
                       }}
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         setProductSelected(row.id);
                         setShowDeleteModal(true);
                       }}

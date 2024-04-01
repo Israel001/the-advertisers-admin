@@ -6,8 +6,9 @@ import axios from 'axios';
 import { ServerRoutes } from '@/libs/app_routes';
 import { useRouter } from 'next/navigation';
 import ToggleSwitch from '@/components/ToggleSwitch/ToggleSwitch';
-import { Editor } from '@tinymce/tinymce-react';
 import { ICategory, IProductData } from '@/types/shared';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export interface ICreateProductProps {
   showModal: boolean;
@@ -70,7 +71,7 @@ const CreateProduct = ({
   );
 
   useEffect(() => {
-    if (product) {
+    if (product && isEditMode) {
       setProductName(product.name);
       setProductQuantity(product.quantity.toString());
       setOutOfStock(product.outOfStock);
@@ -99,7 +100,7 @@ const CreateProduct = ({
       setFeaturedImageError('');
       setImagesError('');
     }
-  }, [product]);
+  }, [product, isEditMode]);
 
   const [imagesForBackend, setImagesForBackend] = useState<Blob[]>([]);
   const [productNameError, setProductNameError] = useState(
@@ -218,7 +219,10 @@ const CreateProduct = ({
     }
   };
 
-  const editorRef = useRef<{ getContent: () => string } | null>(null);
+  const editorRef = useRef<{
+    getData: () => string;
+    setData: (a: string) => void;
+  } | null>(null);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -244,7 +248,7 @@ const CreateProduct = ({
       formData.append('price', productPrice);
       if (discountPrice) formData.append('discountPrice', discountPrice);
       if (editorRef.current) {
-        const desc = editorRef.current.getContent();
+        const desc = editorRef.current.getData();
         formData.append('description', desc);
       }
       formData.append('brand', brand);
@@ -513,42 +517,11 @@ const CreateProduct = ({
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="description">Description:</label>
-            <Editor
-              apiKey="dqm17z66vv1e9w7so9efvi8pybxpi8u7qlrvnq9yrt45uyav"
-              onInit={(evt, editor) => {
-                editorRef.current = editor as any;
-              }}
-              initialValue={description}
-              init={{
-                height: 200,
-                menubar: false,
-                plugins: [
-                  'advlist',
-                  'autolink',
-                  'lists',
-                  'link',
-                  'image',
-                  'charmap',
-                  'preview',
-                  'anchor',
-                  'searchreplace',
-                  'visualblocks',
-                  'code',
-                  'fullscreen',
-                  'insertdatetime',
-                  'media',
-                  'table',
-                  'code',
-                  'help',
-                  'wordcount',
-                ],
-                toolbar:
-                  'undo redo | blocks | ' +
-                  'bold italic forecolor | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent | ' +
-                  'removeformat | help',
-                content_style:
-                  'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            <CKEditor
+              editor={ClassicEditor}
+              data={description}
+              onReady={(editor) => {
+                editorRef.current = editor;
               }}
             />
           </div>
