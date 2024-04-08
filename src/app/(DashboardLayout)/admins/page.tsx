@@ -8,7 +8,7 @@ import axios from 'axios';
 import styles from '../product/product.module.scss';
 import { PlusCircledIcon } from '@radix-ui/react-icons';
 import Table from '@/components/Table/Table';
-import { IAdmin, ICategory } from '@/types/shared';
+import { IAdmin } from '@/types/shared';
 import { Modal } from '@/components/Modal/Modal';
 import withAdminContext from './withAdminContext';
 import CreateAdmin from './CreateAdmin';

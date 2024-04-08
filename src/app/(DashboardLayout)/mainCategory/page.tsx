@@ -198,6 +198,10 @@ const MainCategory = () => {
         {showDeleteModal && (
           <div className={styles.pricingApproveModal}>
             <h2>Are you sure you want to delete this category?</h2>
+            <h2>
+              Note: Deleting this category will cause the system to delete all
+              the sub categories and products related to it.
+            </h2>
             <div className={styles['button-container']}>
               <button
                 className={`${styles.button} ${styles.yes}`}

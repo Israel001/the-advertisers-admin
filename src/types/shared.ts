@@ -33,3 +33,23 @@ export interface IAdmin {
   email: string;
   createdAt: string;
 }
+
+export interface ICustomer {
+  id: number;
+  fullName: string;
+  phone: string;
+  email: string;
+  createdAt: string;
+  deletedAt: string;
+}
+
+export interface IStore {
+  id: number;
+  storeName: string;
+  createdAt: string;
+  deletedAt: string;
+  address: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+}

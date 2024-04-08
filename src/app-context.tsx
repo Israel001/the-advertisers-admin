@@ -1,5 +1,11 @@
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { IAdmin, ICategory, IProductData } from './types/shared';
+import {
+  IAdmin,
+  ICategory,
+  ICustomer,
+  IProductData,
+  IStore,
+} from './types/shared';
 
 export interface IAppContext {
   productData: IProductData[];
@@ -10,6 +16,10 @@ export interface IAppContext {
   setSubCategoryData: (categoryData: ICategory[]) => void;
   adminData: IAdmin[];
   setAdminData: (adminData: IAdmin[]) => void;
+  customerData: ICustomer[];
+  setCustomerData: (customerData: ICustomer[]) => void;
+  storeData: IStore[];
+  setStoreData: (storeData: IStore[]) => void;
 }
 
 const AppContext = createContext<IAppContext>({} as any);
@@ -19,6 +29,8 @@ const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [mainCategoryData, setMainCategoryData] = useState([] as ICategory[]);
   const [subCategoryData, setSubCategoryData] = useState([] as ICategory[]);
   const [adminData, setAdminData] = useState([] as IAdmin[]);
+  const [customerData, setCustomerData] = useState([] as ICustomer[]);
+  const [storeData, setStoreData] = useState([] as IStore[]);
 
   return (
     <AppContext.Provider
@@ -31,6 +43,10 @@ const ContextProvider = ({ children }: { children: ReactNode }) => {
         setSubCategoryData,
         adminData,
         setAdminData,
+        customerData,
+        setCustomerData,
+        storeData,
+        setStoreData,
       }}
     >
       {children}

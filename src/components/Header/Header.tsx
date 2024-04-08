@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './header.module.scss';
-import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -24,6 +23,16 @@ let sidebarItems = [
   {
     name: 'Admins',
     href: '/admins',
+    subMenu: [],
+  },
+  {
+    name: 'Customers',
+    href: '/customers',
+    subMenu: [],
+  },
+  {
+    name: 'Stores',
+    href: '/stores',
     subMenu: [],
   },
 ];
