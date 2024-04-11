@@ -53,3 +53,8 @@ export interface IStore {
   contactPhone: string;
   contactEmail: string;
 }
+
+export interface IState {
+  id: number;
+  name: string;
+}

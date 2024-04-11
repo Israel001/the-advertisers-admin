@@ -12,6 +12,7 @@ import { IStore } from '@/types/shared';
 import { Modal } from '@/components/Modal/Modal';
 import SearchComponent from '@/components/Filter/Filter';
 import withStoreContext from './withStoreContext';
+import CreateStore from './CreateStore';
 
 const Store = () => {
   const router = useRouter();
@@ -22,6 +23,8 @@ const Store = () => {
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [storeSelected, setStoreSelected] = useState<number>();
   const [forceRefresh, setForceRefresh] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [store, setStore] = useState<IStore>();
 
   const { setStoreData, storeData } = useAppContext();
 
@@ -47,16 +50,17 @@ const Store = () => {
         }
       });
     setLoading(false);
+    setForceRefresh(false);
   }, [searchQuery, forceRefresh]);
 
   const toggleStoreActivation = async () => {
     const accessToken = localStorage.getItem('accessToken');
-    console.log(accessToken);
     await axios
       .post(
         `${ServerRoutes.baseUrl}/store/${storeSelected}/${
           showDeactivateModal ? 'deactivate' : 'activate'
         }`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -67,13 +71,12 @@ const Store = () => {
         setForceRefresh(true);
       })
       .catch((error) => {
-        console.log(error);
-        // if (error.response?.data?.statusCode === 401) {
-        //   localStorage.removeItem('accessToken');
-        //   localStorage.removeItem('user');
-        //   localStorage.removeItem('date');
-        //   router.push('/');
-        // }
+        if (error.response?.data?.statusCode === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('date');
+          router.push('/');
+        }
       });
   };
 
@@ -186,7 +189,12 @@ const Store = () => {
           }}
         />
       )}
-      {/* <CreateCustomer showModal={showModal} setShowModal={setShowModal} /> */}
+      <CreateStore
+        showModal={showModal}
+        setShowModal={setShowModal}
+        store={store}
+        isEditMode={isEditMode}
+      />
       <Modal
         isOpen={showDeactivateModal || showActivateModal}
         onCloseModal={() => {

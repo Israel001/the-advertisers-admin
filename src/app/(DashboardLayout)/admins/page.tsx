@@ -43,6 +43,7 @@ const Admin = () => {
         }
       });
     setLoading(false);
+    setForceRefresh(false);
   }, [forceRefresh]);
 
   const deleteAdmin = async () => {

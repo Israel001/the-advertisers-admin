@@ -7,4 +7,5 @@ export class ServerRoutes {
   static getAdminData = `${this.baseUrl}/fetch-admins`;
   static getCustomerData = `${this.baseUrl}/customer`;
   static getStoreData = `${this.baseUrl}/store`;
+  static getStatesData = `${process.env.NEXT_PUBLIC_BACKEND_URL}/lists/states`;
 }

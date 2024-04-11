@@ -12,28 +12,20 @@ import { ICustomer } from '@/types/shared';
 import { Modal } from '@/components/Modal/Modal';
 import withCustomerContext from './withCustomerContext';
 import SearchComponent from '@/components/Filter/Filter';
-import CreateCustomer from './CreateCustomer';
 
-const Customer = () => {
+const Order = () => {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
-  const [showActivateModal, setShowActivateModal] = useState(false);
-  const [customerSelected, setCustomerSelected] = useState<number>();
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [orderSelected, setOrderSelected] = useState<number>();
   const [forceRefresh, setForceRefresh] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [customer, setCustomer] = useState<ICustomer>();
 
   const { setCustomerData, customerData } = useAppContext();
 
   useEffect(() => {
     setLoading(true);
     let url = `${ServerRoutes.getCustomerData}s?pagination[page]=1&pagination[limit]=50`;
-    if (searchQuery) {
-      url = `${url}&search=${searchQuery}`;
-    }
     axios
       .get(url, {
         headers: {
@@ -179,12 +171,6 @@ const Customer = () => {
           }}
         />
       )}
-      <CreateCustomer
-        showModal={showModal}
-        setShowModal={setShowModal}
-        isEditMode={isEditMode}
-        customer={customer}
-      />
       <Modal
         isOpen={showDeactivateModal || showActivateModal}
         onCloseModal={() => {
