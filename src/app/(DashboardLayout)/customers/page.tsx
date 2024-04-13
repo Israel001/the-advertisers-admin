@@ -13,6 +13,7 @@ import { Modal } from '@/components/Modal/Modal';
 import withCustomerContext from './withCustomerContext';
 import SearchComponent from '@/components/Filter/Filter';
 import CreateCustomer from './CreateCustomer';
+import CustomPagination from '@/components/CustomPagination/CustomPagination';
 
 const Customer = () => {
   const router = useRouter();
@@ -25,12 +26,26 @@ const Customer = () => {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [customer, setCustomer] = useState<ICustomer>();
+  const [limit, setLimit] = useState(40);
+  const [page, setPage] = useState(1);
+  const { setCustomerData, customerData, totalData, setTotalData } =
+    useAppContext();
+  const [roleName, setRolename] = useState('');
 
-  const { setCustomerData, customerData } = useAppContext();
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString !== null) {
+      const user = JSON.parse(userString);
+      const roleName = user.role.name;
+      setRolename(roleName);
+    } else {
+      console.error('User data not found in local storage');
+    }
+  }, [roleName]);
 
   useEffect(() => {
     setLoading(true);
-    let url = `${ServerRoutes.getCustomerData}s?pagination[page]=1&pagination[limit]=50`;
+    let url = `${ServerRoutes.getCustomerData}s?pagination[page]=${page}&pagination[limit]=${limit}`;
     if (searchQuery) {
       url = `${url}&search=${searchQuery}`;
     }
@@ -40,7 +55,10 @@ const Customer = () => {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       })
-      .then((response) => setCustomerData(response.data.data))
+      .then((response) => {
+        setTotalData(response?.data?.pagination?.total);
+        setCustomerData(response.data.data);
+      })
       .catch((error) => {
         if (error.response?.data?.statusCode === 401) {
           localStorage.removeItem('accessToken');
@@ -89,95 +107,108 @@ const Customer = () => {
           setSearchQuery={setSearchQuery}
         />
       </div>
-      <div className={styles.createBtnContainer}>
-        <button
-          className={styles.createButton}
-          onClick={() => setShowModal(true)}
-        >
-          <PlusCircledIcon /> Create Customer
-        </button>
-      </div>
+      {roleName !== 'User' && roleName !== 'Simple User' && (
+        <div className={styles.createBtnContainer}>
+          <button
+            className={styles.createButton}
+            onClick={() => setShowModal(true)}
+          >
+            <PlusCircledIcon /> Create Customer
+          </button>
+        </div>
+      )}
+
       {loading ? (
         'Loading....'
       ) : (
-        <Table
-          headers={[
-            {
-              id: 1,
-              label: 'Id',
-            },
-            {
-              id: 2,
-              label: 'Full Name',
-            },
-            {
-              id: 3,
-              label: 'Email',
-            },
-            {
-              id: 4,
-              label: 'Phone',
-            },
-            {
-              id: 5,
-              label: 'Created At',
-            },
-            {
-              id: 6,
-              label: 'Activated',
-            },
-            {
-              id: 7,
-              label: 'Actions',
-            },
-          ]}
-          data={customerData}
-          renderRow={(row: ICustomer, index: number) => {
-            return (
-              <tr key={index}>
-                <td>{row.id}</td>
-                <td>{row.fullName}</td>
-                <td>{row.email}</td>
-                <td>{row.phone}</td>
-                <td>{row.createdAt}</td>
-                <td>{row.deletedAt ? 'false' : 'true'}</td>
-                <td>
-                  <div>
-                    {row.deletedAt ? (
-                      <span
-                        style={{
-                          color: 'blue',
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          setCustomerSelected(row.id);
-                          setShowActivateModal(true);
-                        }}
-                      >
-                        Activate
-                      </span>
-                    ) : (
-                      <span
-                        style={{
-                          color: 'red',
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          setCustomerSelected(row.id);
-                          setShowDeactivateModal(true);
-                        }}
-                      >
-                        Deactivate
-                      </span>
+        <>
+          <Table
+            headers={[
+              {
+                id: 1,
+                label: 'Id',
+              },
+              {
+                id: 2,
+                label: 'Full Name',
+              },
+              {
+                id: 3,
+                label: 'Email',
+              },
+              {
+                id: 4,
+                label: 'Phone',
+              },
+              {
+                id: 5,
+                label: 'Created At',
+              },
+              {
+                id: 6,
+                label: 'Activated',
+              },
+              {
+                id: 7,
+                label: 'Actions',
+              },
+            ]}
+            data={customerData}
+            renderRow={(row: ICustomer, index: number) => {
+              return (
+                <tr key={index}>
+                  <td>{row.id}</td>
+                  <td>{row.fullName}</td>
+                  <td>{row.email}</td>
+                  <td>{row.phone}</td>
+                  <td>{row.createdAt.split('T')[0]}</td>
+                  <td>{row.deletedAt ? 'false' : 'true'}</td>
+                  <td>
+                    {roleName !== 'User' && roleName !== 'Simple User' && (
+                      <div>
+                        {row.deletedAt ? (
+                          <span
+                            style={{
+                              color: 'blue',
+                              textDecoration: 'underline',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setCustomerSelected(row.id);
+                              setShowActivateModal(true);
+                            }}
+                          >
+                            Activate
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              color: 'red',
+                              textDecoration: 'underline',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setCustomerSelected(row.id);
+                              setShowDeactivateModal(true);
+                            }}
+                          >
+                            Deactivate
+                          </span>
+                        )}
+                      </div>
                     )}
-                  </div>
-                </td>
-              </tr>
-            );
-          }}
-        />
+                  </td>
+                </tr>
+              );
+            }}
+          />
+          <CustomPagination
+            totalItems={totalData}
+            currentPage={page}
+            itemsPerPage={limit}
+            onPageChange={(page: number) => setPage(page)}
+          />
+        </>
       )}
       <CreateCustomer
         showModal={showModal}

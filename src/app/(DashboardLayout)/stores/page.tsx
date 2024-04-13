@@ -13,6 +13,7 @@ import { Modal } from '@/components/Modal/Modal';
 import SearchComponent from '@/components/Filter/Filter';
 import withStoreContext from './withStoreContext';
 import CreateStore from './CreateStore';
+import CustomPagination from '@/components/CustomPagination/CustomPagination';
 
 const Store = () => {
   const router = useRouter();
@@ -25,12 +26,25 @@ const Store = () => {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [store, setStore] = useState<IStore>();
+  const [limit, setLimit] = useState(40);
+  const [page, setPage] = useState(1);
+  const [roleName, setRolename] = useState('');
 
-  const { setStoreData, storeData } = useAppContext();
+  const { setStoreData, storeData, totalData, setTotalData } = useAppContext();
 
   useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString !== null) {
+      const user = JSON.parse(userString);
+      const roleName = user.role.name;
+      setRolename(roleName);
+    } else {
+      console.error('User data not found in local storage');
+    }
+  }, [roleName]);
+  useEffect(() => {
     setLoading(true);
-    let url = `${ServerRoutes.getStoreData}s?pagination[page]=1&pagination[limit]=50`;
+    let url = `${ServerRoutes.getStoreData}s?pagination[page]=${page}&pagination[limit]=${limit}`;
     if (searchQuery) {
       url = `${url}&search=${searchQuery}`;
     }
@@ -40,7 +54,10 @@ const Store = () => {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       })
-      .then((response) => setStoreData(response.data.data))
+      .then((response) => {
+        setTotalData(response?.data?.pagination?.total);
+        setStoreData(response.data.data);
+      })
       .catch((error) => {
         if (error.response?.data?.statusCode === 401) {
           localStorage.removeItem('accessToken');
@@ -89,105 +106,122 @@ const Store = () => {
           setSearchQuery={setSearchQuery}
         />
       </div>
-      <div className={styles.createBtnContainer}>
-        <button
-          className={styles.createButton}
-          onClick={() => setShowModal(true)}
-        >
-          <PlusCircledIcon /> Create Store
-        </button>
-      </div>
+      {roleName !== 'User' && roleName !== 'Simple User' && (
+        <div className={styles.createBtnContainer}>
+          <button
+            className={styles.createButton}
+            onClick={() => setShowModal(true)}
+          >
+            <PlusCircledIcon /> Create Store
+          </button>
+        </div>
+      )}
       {loading ? (
         'Loading....'
       ) : (
-        <Table
-          headers={[
-            {
-              id: 1,
-              label: 'Id',
-            },
-            {
-              id: 2,
-              label: 'Store Name',
-            },
-            {
-              id: 3,
-              label: 'Address',
-            },
-            {
-              id: 4,
-              label: 'Contact Name',
-            },
-            {
-              id: 5,
-              label: 'Contact Phone',
-            },
-            {
-              id: 6,
-              label: 'Contact Email',
-            },
-            {
-              id: 7,
-              label: 'Created At',
-            },
-            {
-              id: 8,
-              label: 'Activated',
-            },
-            {
-              id: 9,
-              label: 'Actions',
-            },
-          ]}
-          data={storeData}
-          renderRow={(row: IStore, index: number) => {
-            return (
-              <tr key={index}>
-                <td>{row.id}</td>
-                <td>{row.storeName}</td>
-                <td>{row.address}</td>
-                <td>{row.contactName}</td>
-                <td>{row.contactPhone}</td>
-                <td>{row.contactEmail}</td>
-                <td>{row.createdAt}</td>
-                <td>{row.deletedAt ? 'false' : 'true'}</td>
-                <td>
-                  <div>
-                    {row.deletedAt ? (
-                      <span
-                        style={{
-                          color: 'blue',
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          setStoreSelected(row.id);
-                          setShowActivateModal(true);
-                        }}
-                      >
-                        Activate
-                      </span>
-                    ) : (
-                      <span
-                        style={{
-                          color: 'red',
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          setStoreSelected(row.id);
-                          setShowDeactivateModal(true);
-                        }}
-                      >
-                        Deactivate
-                      </span>
+        <>
+          <Table
+            headers={[
+              {
+                id: 1,
+                label: 'Id',
+              },
+              {
+                id: 2,
+                label: 'Store Name',
+              },
+              {
+                id: 3,
+                label: 'Address',
+              },
+              {
+                id: 4,
+                label: 'Contact Name',
+              },
+              {
+                id: 5,
+                label: 'Contact Phone',
+              },
+              {
+                id: 6,
+                label: 'Contact Email',
+              },
+              {
+                id: 7,
+                label: 'Created At',
+              },
+              {
+                id: 8,
+                label: 'Activated',
+              },
+              {
+                id: 9,
+                label: 'Actions',
+              },
+            ]}
+            data={storeData}
+            renderRow={(row: IStore, index: number) => {
+              return (
+                <tr key={index}>
+                  <td>{row.id}</td>
+                  <td>{row.storeName}</td>
+                  <td>
+                    {row.address.length > 20
+                      ? `${row.address.substring(0, 20)}...`
+                      : row.address}
+                  </td>
+                  <td>{row.contactName}</td>
+                  <td>{row.contactPhone}</td>
+                  <td>{row.contactEmail}</td>
+                  <td>{row.createdAt.split('T')[0]}</td>
+                  <td>{row.deletedAt ? 'false' : 'true'}</td>
+                  <td>
+                    {roleName !== 'User' && roleName !== 'Simple User' && (
+                      <div>
+                        {row.deletedAt ? (
+                          <span
+                            style={{
+                              color: 'blue',
+                              textDecoration: 'underline',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setStoreSelected(row.id);
+                              setShowActivateModal(true);
+                            }}
+                          >
+                            Activate
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              color: 'red',
+                              textDecoration: 'underline',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setStoreSelected(row.id);
+                              setShowDeactivateModal(true);
+                            }}
+                          >
+                            Deactivate
+                          </span>
+                        )}
+                      </div>
                     )}
-                  </div>
-                </td>
-              </tr>
-            );
-          }}
-        />
+                  </td>
+                </tr>
+              );
+            }}
+          />
+
+          <CustomPagination
+            totalItems={totalData}
+            currentPage={page}
+            itemsPerPage={limit}
+            onPageChange={(page: number) => setPage(page)}
+          />
+        </>
       )}
       <CreateStore
         showModal={showModal}

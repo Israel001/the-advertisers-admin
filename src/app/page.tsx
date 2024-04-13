@@ -5,11 +5,13 @@ import styles from './page.module.css';
 import { useState } from 'react';
 import axios from 'axios';
 import { ServerRoutes } from '@/libs/app_routes';
+import { useAppContext } from '@/app-context';
 
 const LoginPage = () => {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

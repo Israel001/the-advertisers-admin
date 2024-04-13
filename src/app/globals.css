@@ -161,3 +161,53 @@ a {
 .slick-slide {
   margin-right: 1rem !important;
 }
+
+/* CustomPagination.module.css */
+.pagination {
+  display: flex;
+  /* justify-content: center; */
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.pagination ul {
+  list-style-type: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.pagination li {
+  color: var(--neutral-neutral-400, #a7b1c5);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.14px;
+  padding: 5px 10px;
+}
+
+.pagination li.active {
+  font-weight: bold;
+  border-radius: 3px;
+  background: var(--primary-primary-700-main, #2b55b7);
+  color: var(--shades-white, #fff);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.14px;
+  padding: 5px 10px;
+}
+
+.disabledPaginationArrow {
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.enablePaginationArrow {
+  cursor: pointer;
+}
+
+.hide{
+  display: none;
+}

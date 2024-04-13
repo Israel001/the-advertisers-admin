@@ -13,6 +13,7 @@ import { ICategory } from '@/types/shared';
 import { Modal } from '@/components/Modal/Modal';
 import withSubCategoryContext from './withSubCategoryContext';
 import CreateSubCategory from './CreateSubCategory';
+import CustomPagination from '@/components/CustomPagination/CustomPagination';
 
 const SubCategory = () => {
   const router = useRouter();
@@ -25,12 +26,26 @@ const SubCategory = () => {
   const [forceRefresh, setForceRefresh] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [subCategory, setSubCategory] = useState<ICategory>();
+  const [limit, setLimit] = useState(40);
+  const [roleName, setRolename] = useState('');
 
-  const { setSubCategoryData, subCategoryData } = useAppContext();
+  const { setSubCategoryData, subCategoryData, totalData, setTotalData } =
+    useAppContext();
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString !== null) {
+      const user = JSON.parse(userString);
+      const roleName = user.role.name;
+      setRolename(roleName);
+    } else {
+      console.error('User data not found in local storage');
+    }
+  }, [roleName]);
 
   useEffect(() => {
     setLoading(true);
-    let url = `${ServerRoutes.getCategoriesData}?pagination[page]=${page}&pagination[limit]=50`;
+    let url = `${ServerRoutes.getCategoriesData}?pagination[page]=${page}&pagination[limit]=${limit}`;
     if (searchQuery) {
       url = `${url}&search=${searchQuery}`;
     }
@@ -40,7 +55,10 @@ const SubCategory = () => {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       })
-      .then((response) => setSubCategoryData(response.data))
+      .then((response) => {
+        setTotalData(response?.data?.pagination?.total);
+        setSubCategoryData(response.data.data);
+      })
       .catch((error) => {
         if (error.response?.data?.statusCode === 401) {
           localStorage.removeItem('accessToken');
@@ -84,114 +102,131 @@ const SubCategory = () => {
           setSearchQuery={setSearchQuery}
         />
       </div>
-      <div className={styles.createBtnContainer}>
-        <button
-          className={styles.createButton}
-          onClick={() => setShowModal(true)}
-        >
-          <PlusCircledIcon /> Create Sub Category
-        </button>
-      </div>
+      {roleName !== 'User' && roleName !== 'Simple User' && (
+        <div className={styles.createBtnContainer}>
+          <button
+            className={styles.createButton}
+            onClick={() => setShowModal(true)}
+          >
+            <PlusCircledIcon /> Create Sub Category
+          </button>
+        </div>
+      )}
+
       {loading ? (
         'Loading....'
       ) : (
-        <Table
-          headers={[
-            {
-              id: 1,
-              label: 'Category Id',
-            },
-            {
-              id: 2,
-              label: 'Category Name',
-            },
-            {
-              id: 3,
-              label: 'Main Category Name',
-            },
-            {
-              id: 4,
-              label: 'Category Image',
-            },
-            {
-              id: 5,
-              label: 'Category Description',
-            },
-            {
-              id: 6,
-              label: 'Date Created',
-            },
-            {
-              id: 7,
-              label: 'Actions',
-            },
-          ]}
-          data={subCategoryData}
-          renderRow={(row: ICategory, index: number) => {
-            return (
-              <tr key={index}>
-                <td>{row.id}</td>
-                <td>
-                  {row.name.length > 20
-                    ? `${row.name.substring(0, 20)}...`
-                    : row.name}
-                </td>
-                <td>
-                  {row.mainCategory.name.length > 20
-                    ? `${row.mainCategory.name.substring(0, 20)}...`
-                    : row.mainCategory.name}
-                </td>
-                <td>
-                  {
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${row.featuredImage}`}
-                      style={{ height: '50px' }}
-                    />
-                  }
-                </td>
-                <td>
-                  {row.description.length > 20
-                    ? `${row.description.substring(0, 20)}...`
-                    : row.description}
-                </td>
-                <td>{row.createdAt}</td>
-                <td>
-                  <div>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        marginRight: '1rem',
-                        color: 'blue',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        setShowModal(true);
-                        setSubCategory(row);
-                        setIsEditMode(true);
-                      }}
-                    >
-                      Edit
-                    </span>
-                    <span
-                      style={{
-                        color: 'red',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        setCategorySelected(row.id);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      Delete
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            );
-          }}
-        />
+        <>
+          <Table
+            headers={[
+              {
+                id: 1,
+                label: 'Category Id',
+              },
+              {
+                id: 2,
+                label: 'Category Name',
+              },
+              {
+                id: 3,
+                label: 'Main Category Name',
+              },
+              {
+                id: 4,
+                label: 'Category Image',
+              },
+              {
+                id: 5,
+                label: 'Category Description',
+              },
+              {
+                id: 6,
+                label: 'Date Created',
+              },
+              {
+                id: 7,
+                label: 'Actions',
+              },
+            ]}
+            data={subCategoryData}
+            renderRow={(row: ICategory, index: number) => {
+              return (
+                <tr key={index}>
+                  <td>{row.id}</td>
+                  <td>
+                    {row.name.length > 20
+                      ? `${row.name.substring(0, 20)}...`
+                      : row.name}
+                  </td>
+                  <td>
+                    {row.mainCategory.name.length > 20
+                      ? `${row.mainCategory.name.substring(0, 20)}...`
+                      : row.mainCategory.name}
+                  </td>
+                  <td>
+                    {
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${row.featuredImage}`}
+                        style={{ height: '50px' }}
+                      />
+                    }
+                  </td>
+                  <td>
+                    {row.description.length > 20
+                      ? `${row.description.substring(0, 20)}...`
+                      : row.description}
+                  </td>
+                  <td>{row.createdAt.split('T')[0]}</td>
+                  <td>
+                    <div>
+                      {roleName !== 'User' && roleName !== 'Simple User' && (
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            marginRight: '1rem',
+                            color: 'blue',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => {
+                            setShowModal(true);
+                            setSubCategory(row);
+                            setIsEditMode(true);
+                          }}
+                        >
+                          Edit
+                        </span>
+                      )}
+                      {roleName !== 'Editor' &&
+                        roleName !== 'User' &&
+                        roleName !== 'Simple User' && (
+                          <span
+                            style={{
+                              color: 'red',
+                              textDecoration: 'underline',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setCategorySelected(row.id);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            Delete
+                          </span>
+                        )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            }}
+          />
+          <CustomPagination
+            totalItems={totalData}
+            currentPage={page}
+            itemsPerPage={limit}
+            onPageChange={(page: number) => setPage(page)}
+          />
+        </>
       )}
       <CreateSubCategory
         showModal={showModal}

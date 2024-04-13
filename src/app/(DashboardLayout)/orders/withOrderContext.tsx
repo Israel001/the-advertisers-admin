@@ -5,27 +5,24 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const withProductContext = (Component: () => JSX.Element) => {
+const withOrderContext = (Component: () => JSX.Element) => {
   return () => {
-    const { setProductData, setTotalData } = useAppContext();
+    const { setOrderData } = useAppContext();
     const router = useRouter();
     const [isLoading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(40);
-    const getProductData = async (accessToken: string) => {
+    const getOrderData = async (accessToken: string) => {
       await axios
         .get(
-          `${ServerRoutes.getProductData}s?pagination[page]=${page}&pagination[limit]=${limit}`,
+          `${ServerRoutes.getOrderData}s?pagination[page]=${page}&pagination[limit]=${limit}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           },
         )
-        .then((response) => {
-          setProductData(response.data.data);
-          setTotalData(response?.data?.pagination?.total);
-        })
+        .then((response) => setOrderData(response.data.data))
         .catch((error) => {
           if (error.response?.data?.statusCode === 401) {
             localStorage.removeItem('accessToken');
@@ -43,7 +40,7 @@ const withProductContext = (Component: () => JSX.Element) => {
       const date = localStorage.getItem('date');
       const expiredToken = date && new Date().getTime() - +date > 3.6e6;
       if (!accessToken || !user || expiredToken !== false) router.push('/');
-      getProductData(accessToken!);
+      getOrderData(accessToken!);
       setLoading(false);
     }, []);
 
@@ -51,4 +48,4 @@ const withProductContext = (Component: () => JSX.Element) => {
   };
 };
 
-export default withProductContext;
+export default withOrderContext;

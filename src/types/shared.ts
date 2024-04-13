@@ -32,6 +32,7 @@ export interface IAdmin {
   fullName: string;
   email: string;
   createdAt: string;
+  role: { name: string };
 }
 
 export interface ICustomer {
@@ -54,7 +55,19 @@ export interface IStore {
   contactEmail: string;
 }
 
+export interface IOrder {
+  id: number;
+  createdAt: string;
+  status: string;
+  amount: string;
+}
+
 export interface IState {
   id: number;
   name: string;
+}
+
+export interface IRoles {
+  name: string;
+  id: number;
 }

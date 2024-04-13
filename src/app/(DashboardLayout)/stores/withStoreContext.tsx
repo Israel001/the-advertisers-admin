@@ -10,11 +10,12 @@ const withStoreContext = (Component: () => JSX.Element) => {
     const { setStoreData } = useAppContext();
     const router = useRouter();
     const [isLoading, setLoading] = useState(true);
-
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(40);
     const getStoreData = async (accessToken: string) => {
       await axios
         .get(
-          `${ServerRoutes.getStoreData}s?pagination[page]=1&pagination[limit]=50`,
+          `${ServerRoutes.getStoreData}s?pagination[page]=${page}&pagination[limit]=${limit}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

@@ -12,6 +12,8 @@ import { IAdmin } from '@/types/shared';
 import { Modal } from '@/components/Modal/Modal';
 import withAdminContext from './withAdminContext';
 import CreateAdmin from './CreateAdmin';
+import SearchComponent from '@/components/Filter/Filter';
+import CustomPagination from '@/components/CustomPagination/CustomPagination';
 
 const Admin = () => {
   const router = useRouter();
@@ -21,19 +23,38 @@ const Admin = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [adminSelected, setAdminSelected] = useState<number>();
   const [forceRefresh, setForceRefresh] = useState(false);
+  const [limit, setLimit] = useState(40);
+  const [page, setPage] = useState(1);
 
-  const { setAdminData, adminData } = useAppContext();
+  const { setAdminData, adminData, totalData, setTotalData, userRoleData } =
+    useAppContext();
+  const [roleName, setRolename] = useState('');
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString !== null) {
+      const user = JSON.parse(userString);
+      const roleName = user.role.name;
+      setRolename(roleName);
+    } else {
+      console.error('User data not found in local storage');
+    }
+  }, [roleName]);
+
 
   useEffect(() => {
     setLoading(true);
-    let url = `${ServerRoutes.getAdminData}`;
+    let url = `${ServerRoutes.getAdminData}?pagination[page]=${page}&pagination[limit]=${limit}`;
     axios
       .get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       })
-      .then((response) => setAdminData(response.data))
+      .then((response) => {
+        setTotalData(response?.data?.pagination?.total);
+        setAdminData(response.data.data);
+      })
       .catch((error) => {
         if (error.response?.data?.statusCode === 401) {
           localStorage.removeItem('accessToken');
@@ -70,6 +91,12 @@ const Admin = () => {
   return (
     <div>
       <h2 className={styles.pageHeader}>Admins</h2>
+      <div style={{ marginBottom: '20px' }}>
+        <SearchComponent
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+      </div>
       <div className={styles.createBtnContainer}>
         <button
           className={styles.createButton}
@@ -81,58 +108,75 @@ const Admin = () => {
       {loading ? (
         'Loading....'
       ) : (
-        <Table
-          headers={[
-            {
-              id: 1,
-              label: 'Id',
-            },
-            {
-              id: 2,
-              label: 'Full Name',
-            },
-            {
-              id: 3,
-              label: 'Email',
-            },
-            {
-              id: 4,
-              label: 'Created At',
-            },
-            {
-              id: 5,
-              label: 'Actions',
-            },
-          ]}
-          data={adminData}
-          renderRow={(row: IAdmin, index: number) => {
-            return (
-              <tr key={index}>
-                <td>{row.id}</td>
-                <td>{row.fullName}</td>
-                <td>{row.email}</td>
-                <td>{row.createdAt}</td>
-                <td>
-                  <div>
-                    <span
-                      style={{
-                        color: 'red',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        setAdminSelected(row.id);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      Delete
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            );
-          }}
-        />
+        <>
+          <Table
+            headers={[
+              {
+                id: 1,
+                label: 'Id',
+              },
+              {
+                id: 2,
+                label: 'Full Name',
+              },
+              {
+                id: 3,
+                label: 'Email',
+              },
+              {
+                id: 4,
+                label: 'Role',
+              },
+              {
+                id: 5,
+                label: 'Created At',
+              },
+              roleName === 'Super Admin'
+                ? {
+                    id: 6,
+                    label: 'Actions',
+                  }
+                : '',
+            ]}
+            data={adminData}
+            renderRow={(row: IAdmin, index: number) => {
+              return (
+                <tr key={index}>
+                  <td>{row.id}</td>
+                  <td>{row.fullName}</td>
+                  <td>{row.email}</td>
+                  <td>{row.role?.name}</td>
+                  <td>{row.createdAt.split('T')[0]}</td>
+                  {roleName === 'Super Admin' && (
+                    <td>
+                      <div>
+                        <span
+                          style={{
+                            color: 'red',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => {
+                            setAdminSelected(row.id);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          Delete
+                        </span>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              );
+            }}
+          />
+          <CustomPagination
+            totalItems={totalData}
+            currentPage={page}
+            itemsPerPage={limit}
+            onPageChange={(page: number) => setPage(page)}
+          />
+        </>
       )}
       <CreateAdmin showModal={showModal} setShowModal={setShowModal} />
       <Modal

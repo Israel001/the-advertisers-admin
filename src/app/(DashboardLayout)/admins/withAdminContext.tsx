@@ -10,18 +10,20 @@ const withAdminContext = (Component: () => JSX.Element) => {
     const { setAdminData } = useAppContext();
     const router = useRouter();
     const [isLoading, setLoading] = useState(true);
-
+    const [limit, setLimit] = useState(40);
+    const [page, setPage] = useState(1);
+    
     const getAdminData = async (accessToken: string) => {
       await axios
         .get(
-          `${ServerRoutes.getAdminData}`,
+          `${ServerRoutes.getAdminData}?pagination[page]=${page}&pagination[limit]=${limit}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           },
         )
-        .then((response) => setAdminData(response.data))
+        .then((response) => setAdminData(response.data.data))
         .catch((error) => {
           if (error.response?.data?.statusCode === 401) {
             localStorage.removeItem('accessToken');

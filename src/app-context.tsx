@@ -5,6 +5,7 @@ import {
   ICustomer,
   IProductData,
   IStore,
+  IOrder,
 } from './types/shared';
 
 export interface IAppContext {
@@ -20,6 +21,12 @@ export interface IAppContext {
   setCustomerData: (customerData: ICustomer[]) => void;
   storeData: IStore[];
   setStoreData: (storeData: IStore[]) => void;
+  orderData: IOrder[];
+  setOrderData: (orderData: IOrder[]) => void;
+  totalData?: number;
+  setTotalData: (totalData: number) => void;
+  userRoleData?: string;
+  setUserRoleData: (userRoleData: string) => void;
 }
 
 const AppContext = createContext<IAppContext>({} as any);
@@ -31,6 +38,9 @@ const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [adminData, setAdminData] = useState([] as IAdmin[]);
   const [customerData, setCustomerData] = useState([] as ICustomer[]);
   const [storeData, setStoreData] = useState([] as IStore[]);
+  const [orderData, setOrderData] = useState([] as IOrder[]);
+  const [totalData, setTotalData] = useState<number>();
+  const [userRoleData, setUserRoleData] = useState("");
 
   return (
     <AppContext.Provider
@@ -47,6 +57,12 @@ const ContextProvider = ({ children }: { children: ReactNode }) => {
         setCustomerData,
         storeData,
         setStoreData,
+        orderData,
+        setOrderData,
+        totalData,
+        setTotalData,
+        userRoleData,
+        setUserRoleData,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './header.module.scss';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
@@ -20,11 +20,12 @@ let sidebarItems = [
     href: '/subCategory',
     subMenu: [],
   },
-  {
-    name: 'Admins',
-    href: '/admins',
-    subMenu: [],
-  },
+
+  // {
+  //   name: 'Admins',
+  //   href: '/admins',
+  //   subMenu: [],
+  // },
   {
     name: 'Customers',
     href: '/customers',
@@ -35,11 +36,28 @@ let sidebarItems = [
     href: '/stores',
     subMenu: [],
   },
+  {
+    name: 'Orders',
+    href: '/orders',
+    subMenu: [],
+  },
 ];
 
 const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const [roleName, setRolename] = useState('');
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString !== null) {
+      const user = JSON.parse(userString);
+      const roleName = user.role.name;
+      setRolename(roleName);
+    } else {
+      console.error('User data not found in local storage');
+    }
+  }, [roleName]);
 
   return (
     <div className={styles.navbar}>
@@ -75,6 +93,11 @@ const Header: React.FC = () => {
             </Link>
           );
         })}
+        {roleName === 'Super Admin' && (
+          <Link href="/admins" className={`${styles.navLink} `}>
+            Admins
+          </Link>
+        )}{' '}
       </div>
     </div>
   );

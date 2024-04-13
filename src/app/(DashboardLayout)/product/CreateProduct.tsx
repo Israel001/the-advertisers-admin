@@ -1,7 +1,7 @@
 import { Modal } from '@/components/Modal/Modal';
 import styles from '../product/product.module.scss';
 import { Cross1Icon } from '@radix-ui/react-icons';
-import { ChangeEvent, ComponentType, MutableRefObject, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, ComponentType, MutableRefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { ServerRoutes } from '@/libs/app_routes';
 import { useRouter } from 'next/navigation';
@@ -137,10 +137,10 @@ const CreateProduct = ({
           Authorization: `Bearer ${accessToken}`,
         },
       })
-      .then((response) => {
+      .then((response: { data: SetStateAction<ICategory[]>; }) => {
         setCategories(response.data);
       })
-      .catch((error) => {
+      .catch((error: { response: { data: { statusCode: number; }; }; }) => {
         if (error.response?.data?.statusCode === 401) {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('user');

@@ -10,18 +10,19 @@ const withMainCategoryContext = (Component: () => JSX.Element) => {
     const { setMainCategoryData } = useAppContext();
     const router = useRouter();
     const [isLoading, setLoading] = useState(true);
-
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(40);
     const getMainCategoryData = async (accessToken: string) => {
       await axios
         .get(
-          `${ServerRoutes.getMainCategoriesData}?pagination[page]=1&pagination[limit]=50`,
+          `${ServerRoutes.getMainCategoriesData}?pagination[page]=${page}&pagination[limit]=${limit}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           },
         )
-        .then((response) => setMainCategoryData(response.data))
+        .then((response) => setMainCategoryData(response.data.data))
         .catch((error) => {
           if (error.response?.data?.statusCode === 401) {
             localStorage.removeItem('accessToken');

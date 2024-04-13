@@ -10,11 +10,12 @@ const withSubCategoryContext = (Component: () => JSX.Element) => {
     const { setSubCategoryData } = useAppContext();
     const router = useRouter();
     const [isLoading, setLoading] = useState(true);
-
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(40);
     const getSubCategoryData = async (accessToken: string) => {
       await axios
         .get(
-          `${ServerRoutes.getCategoriesData}?pagination[page]=1&pagination[limit]=50`,
+          `${ServerRoutes.getCategoriesData}?pagination[page]=${page}&pagination[limit]=${limit}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

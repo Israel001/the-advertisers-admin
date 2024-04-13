@@ -1,11 +1,11 @@
 import { Modal } from '@/components/Modal/Modal';
 import styles from '../product/product.module.scss';
 import { Cross1Icon } from '@radix-ui/react-icons';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, SetStateAction, useEffect, useState } from 'react';
 import axios from 'axios';
 import { ServerRoutes } from '@/libs/app_routes';
 import { useRouter } from 'next/navigation';
-import { ICategory } from '@/types/shared';
+import { ICategory, IRoles } from '@/types/shared';
 
 export interface ICreateAdminProps {
   showModal: boolean;
@@ -21,14 +21,16 @@ const CreateAdmin = ({ showModal, setShowModal }: ICreateAdminProps) => {
   const [nameError, setNameError] = useState('Full name is required');
   const [emailError, setEmailError] = useState('Email is required');
   const [passwordError, setPasswordError] = useState('Password is required');
-
+  const [rolesError, setRolesError] = useState('Role is required');
+  const [allRoles, setAllRoles] = useState<IRoles[]>([]);
+  const [selectedRole, setSelectedRole] = useState('');
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    if (!nameError && !emailError && !passwordError) {
+    if (!nameError && !emailError && !passwordError && !rolesError) {
       axios
         .post(
           `${ServerRoutes.baseUrl}`,
-          { fullName: name, email, password },
+          { fullName: name, email, password, roleId: Number(selectedRole) },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -50,6 +52,32 @@ const CreateAdmin = ({ showModal, setShowModal }: ICreateAdminProps) => {
         });
     }
   };
+
+  const fetchAllRoles = async () => {
+    const accessToken = localStorage.getItem('accessToken');
+    await axios
+      .get(`${ServerRoutes.getAllRolesData}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((response: { data: SetStateAction<IRoles[]> }) => {
+        setAllRoles(response.data);
+      })
+      .catch((error: { response: { data: { statusCode: number } } }) => {
+        if (error.response?.data?.statusCode === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('date');
+          router.push('/');
+        }
+      });
+  };
+
+  useEffect(() => {
+    fetchAllRoles();
+  }, []);
+
 
   return (
     <Modal isOpen={showModal} onCloseModal={() => setShowModal(false)} text="">
@@ -112,7 +140,34 @@ const CreateAdmin = ({ showModal, setShowModal }: ICreateAdminProps) => {
                 passwordError ? { border: '1px solid red', color: 'red' } : {}
               }
             />
-            {passwordError && <span style={{ color: 'red' }}>{passwordError}</span>}
+            {passwordError && (
+              <span style={{ color: 'red' }}>{passwordError}</span>
+            )}
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="password">Roles:</label>
+            <select
+              className={styles.customSelect}
+              id="roles"
+              value={selectedRole}
+              onChange={(e) => {
+                setSelectedRole(e.target.value);
+                e.target.value.trim()
+                  ? setRolesError('')
+                  : setRolesError('Roles is required');
+              }}
+              style={
+                rolesError ? { border: '1px solid red', color: 'red' } : {}
+              }
+            >
+              <option value="">Select Role</option>
+              {allRoles.map((role, index) => (
+                <option key={index} value={role.id}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
+            {rolesError && <span style={{ color: 'red' }}>{rolesError}</span>}
           </div>
           <div className={styles.btnContainer}>
             <button type="submit">Submit</button>
