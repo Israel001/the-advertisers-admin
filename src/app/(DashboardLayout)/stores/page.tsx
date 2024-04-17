@@ -176,7 +176,7 @@ const Store = () => {
                   <td>{row.createdAt.split('T')[0]}</td>
                   <td>{row.deletedAt ? 'false' : 'true'}</td>
                   <td>
-                    {roleName !== 'User' && roleName !== 'Simple User' && (
+                    {roleName === 'Super Admin' && (
                       <div>
                         {row.deletedAt ? (
                           <span
