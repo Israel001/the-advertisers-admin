@@ -153,7 +153,7 @@ const CreateProduct = ({
   const fetchMainCategories = async () => {
     const accessToken = localStorage.getItem('accessToken');
     await axios
-      .get(`${ServerRoutes.getMainCategoriesData}`, {
+      .get(`${ServerRoutes.getAllMainCategoriesData}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
