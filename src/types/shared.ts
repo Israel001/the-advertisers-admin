@@ -60,6 +60,8 @@ export interface IOrder {
   createdAt: string;
   status: string;
   amount: string;
+  payment?: any;
+  details?: any;
 }
 
 export interface IState {

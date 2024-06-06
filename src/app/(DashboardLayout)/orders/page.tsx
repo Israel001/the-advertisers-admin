@@ -10,12 +10,16 @@ import Table from '@/components/Table/Table';
 import { IOrder } from '@/types/shared';
 import withOrderContext from './withOrderContext';
 import CustomPagination from '@/components/CustomPagination/CustomPagination';
+import ViewOrderDetails from './viewOrderDetails';
+import { formatWithNaira } from '@/libs/utils';
 
 const Order = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [orderSelected, setOrderSelected] = useState<number>();
+  const [orderSelectedDetails, setOrderSelectedDetails] = useState();
+
   const [forceRefresh, setForceRefresh] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(40);
@@ -83,7 +87,7 @@ const Order = () => {
                   <td>{row.id}</td>
                   <td>{row.createdAt.split('T')[0]}</td>
                   <td>{row.status}</td>
-                  <td>{row.amount}</td>
+                  <td> {formatWithNaira(parseFloat(row.payment?.amount))}</td>
                   <td>
                     <span
                       style={{
@@ -93,6 +97,7 @@ const Order = () => {
                       }}
                       onClick={() => {
                         setOrderSelected(row.id);
+                        setOrderSelectedDetails(JSON.parse(row?.details));
                         setShowDetailsModal(true);
                       }}
                     >
@@ -111,6 +116,11 @@ const Order = () => {
           />
         </>
       )}
+      <ViewOrderDetails
+        showModal={showDetailsModal}
+        setShowModal={setShowDetailsModal}
+        orderDetails={orderSelectedDetails}
+      />
     </div>
   );
 };
