@@ -164,7 +164,7 @@ const Customer = () => {
                   <td>{row.createdAt.split('T')[0]}</td>
                   <td>{row.deletedAt ? 'false' : 'true'}</td>
                   <td>
-                    {roleName === 'Super Admin' && (
+                    {roleName !== 'User' && roleName !== 'Simple User' && (
                       <div>
                         {row.deletedAt ? (
                           <span

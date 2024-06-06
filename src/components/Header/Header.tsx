@@ -59,22 +59,6 @@ const Header: React.FC = () => {
     }
   }, [roleName]);
 
-  const renderMenuItems = (href: string, name: string) => {
-    const parts = pathname.split('/').filter(Boolean);
-    const firstPart = parts[0];
-    const isActiveLink = `/${firstPart}` === href;
-
-    return (
-      <Link
-        href={href}
-        key={`${name}-key`}
-        className={`${styles.navLink} ${isActiveLink ? styles.active : ''}`}
-      >
-        {name}
-      </Link>
-    );
-  };
-
   return (
     <div className={styles.navbar}>
       <div className={styles.upperSection}>
@@ -94,17 +78,23 @@ const Header: React.FC = () => {
         </div>
       </div>
       <div className={styles.lowerSection}>
-        {roleName === 'Simple User'
-          ? sidebarItems
-              .filter((item) =>
-                ['/customers', '/stores', '/orders'].includes(item.href),
-              )
-              .map(({ name, href }) => {
-                return renderMenuItems(href, name);
-              })
-          : sidebarItems.map(({ name, href }) => {
-              return renderMenuItems(href, name);
-            })}
+        {sidebarItems.map(({ name, href }) => {
+          const parts = pathname.split('/').filter(Boolean);
+          const firstPart = parts[0];
+          const isActiveLink = `/${firstPart}` === href;
+
+          return (
+            <Link
+              href={href}
+              key={`${name}-key`}
+              className={`${styles.navLink} ${
+                isActiveLink ? styles.active : ''
+              }`}
+            >
+              {name}
+            </Link>
+          );
+        })}
         {roleName === 'Super Admin' && (
           <Link href="/admins" className={`${styles.navLink} `}>
             Admins
