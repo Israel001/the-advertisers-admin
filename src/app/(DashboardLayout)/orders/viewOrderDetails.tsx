@@ -2,19 +2,26 @@ import React from 'react';
 import { Modal } from '@/components/Modal/Modal';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { formatWithNaira } from '@/libs/utils';
+import axios from 'axios';
+import { ServerRoutes } from '@/libs/app_routes';
+import { useRouter } from 'next/navigation';
 
 export interface IOrderViewDetailsProps {
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
   orderDetails: any;
+  orderId?: number;
+  status: string;
 }
 
 function ViewOrderDetails({
   showModal,
   setShowModal,
   orderDetails,
+  orderId,
+  status,
 }: IOrderViewDetailsProps) {
-  console.log('sdzcs', orderDetails);
+  const router = useRouter();
 
   return (
     <Modal isOpen={showModal} onCloseModal={() => setShowModal(false)} text="">
@@ -102,9 +109,74 @@ function ViewOrderDetails({
                 </div>
               </div>
               <div>
-                <h1 className="sm:text-2xl text-xl text-qblack font-medium mb-5">
-                  Order Summary
-                </h1>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <h1 className="sm:text-2xl text-xl text-qblack font-medium mb-5">
+                    Order Summary
+                  </h1>
+                  {orderDetails?.cart?.every(
+                    (c: any) =>
+                      c.status !==
+                      'Mark order as packed, waiting for courier...',
+                  ) ? (
+                    status === 'SENT_FOR_DELIVERY' ? (
+                      <span style={{ color: 'green' }}>Sent for Delivery</span>
+                    ) : (
+                      <button
+                        style={{
+                          fontSize: '11px',
+                          color: 'white',
+                          padding: '5px 10px',
+                          borderRadius: '10px',
+                          backgroundColor: '#0056b3',
+                          outline: 'none',
+                          marginLeft: '15px',
+                          width: '120px',
+                        }}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          axios
+                            .put(
+                              `${ServerRoutes.getOrderData}/${orderId}/${
+                                status === 'PACKED_AND_READY_TO_SEND'
+                                  ? 'SENT_FOR_DELIVERY'
+                                  : 'PACKED_AND_READY_TO_SEND'
+                              }`,
+                              {},
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${localStorage.getItem(
+                                    'accessToken',
+                                  )}`,
+                                },
+                              },
+                            )
+                            .then(() => location.reload())
+                            .catch((error) => {
+                              if (error.response?.data?.statusCode === 401) {
+                                localStorage.removeItem('accessToken');
+                                localStorage.removeItem('user');
+                                localStorage.removeItem('date');
+                                router.push('/');
+                              }
+                            });
+                        }}
+                      >
+                        {status === 'PACKED_AND_READY_TO_SEND'
+                          ? 'Mark order as sent for delivery'
+                          : 'Mark order as packed and ready to send'}
+                      </button>
+                    )
+                  ) : (
+                    <></>
+                  )}
+                </div>
 
                 <div className="w-full px-10 py-[30px] border border-[#EDEDED]">
                   <div className="sub-total mb-6">
@@ -112,62 +184,79 @@ function ViewOrderDetails({
                       <p className="text-[13px] font-medium text-qblack uppercase">
                         product
                       </p>
-                      <p className="text-[13px] font-medium text-qblack uppercase">
-                        total
-                      </p>
+                      <div
+                        style={{
+                          display: 'flex',
+                          width: '31%',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <p className="text-[13px] font-medium text-qblack uppercase">
+                          total
+                        </p>
+                        <p className="text-[13px] font-medium text-qblack uppercase">
+                          status
+                        </p>
+                      </div>
                     </div>
                     <div className="w-full h-[1px] bg-[#EDEDED]"></div>
                   </div>
                   <div className="product-list w-full mb-[30px]">
                     <ul className="flex flex-col space-y-5">
-                      {orderDetails?.cart?.map((x: any, idx: any) => (
-                        <a
-                          key={idx}
-                          href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/single-product/${x.id}`}
-                        >
-                          <li>
-                            <div className="flex justify-between items-center gap-14">
-                              <div className="w-[80px] h-[80px] overflow-hidden flex justify-center items-center border border-[#EDEDED]">
-                                <img
-                                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${x.image}`}
-                                  alt="product"
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <div>
-                                <h4 className="text-[15px] text-left text-qblack mb-2.5 flex items-center">
-                                  <span className="w-[250px] whitespace-nowrap overflow-hidden overflow-ellipsis block">
-                                    {x?.name}
-                                  </span>
+                      {orderDetails?.cart?.map((x: any, idx: any) => {
+                        console.log('x', x);
+                        return (
+                          <a
+                            key={idx}
+                            href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/single-product/${x.id}`}
+                          >
+                            <li>
+                              <div className="flex justify-between items-center gap-14">
+                                <div className="w-[80px] h-[80px] overflow-hidden flex justify-center items-center border border-[#EDEDED]">
+                                  <img
+                                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${x.image}`}
+                                    alt="product"
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div>
+                                  <h4 className="text-[15px] text-left text-qblack mb-2.5 flex items-center">
+                                    <span className="w-[250px] whitespace-nowrap overflow-hidden overflow-ellipsis block">
+                                      {x?.name}
+                                    </span>
 
-                                  <sup className="text-[13px] text-qgray ml-2 mt-2">
-                                    x{x.quantity}
-                                  </sup>
-                                </h4>
+                                    <sup className="text-[13px] text-qgray ml-2 mt-2">
+                                      x{x.quantity}
+                                    </sup>
+                                  </h4>
+                                </div>
+                                <div className="flex items-center">
+                                  <span className="text-[15px] text-qblack font-medium">
+                                    {formatWithNaira(parseFloat(x.price))}
+                                  </span>
+                                  <button
+                                    style={{
+                                      fontSize: '11px',
+                                      color: 'white',
+                                      padding: '5px 10px',
+                                      borderRadius: '10px',
+                                      backgroundColor: '#333',
+                                      outline: 'none',
+                                      marginLeft: '15px',
+                                      width: '120px',
+                                    }}
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                    }}
+                                  >
+                                    {x.status ? x.status : 'PENDING'}
+                                  </button>
+                                </div>
                               </div>
-                              <div className="flex items-center">
-                                <span className="text-[15px] text-qblack font-medium">
-                                  {formatWithNaira(parseFloat(x.price))}
-                                </span>
-                                <button
-                                  style={{
-                                    fontSize: '11px',
-                                    color: 'white',
-                                    padding: '5px 10px',
-                                    borderRadius: '10px',
-                                    backgroundColor: '#0056b3',
-                                    outline: 'none',
-                                    marginLeft: '15px',
-                                    width: '120px',
-                                  }}
-                                >
-                                  Mark order as packed and <br /> ready to send
-                                </button>
-                              </div>
-                            </div>
-                          </li>
-                        </a>
-                      ))}
+                            </li>
+                          </a>
+                        );
+                      })}
                     </ul>
                   </div>
                   <div className="w-full h-[1px] bg-[#EDEDED]"></div>

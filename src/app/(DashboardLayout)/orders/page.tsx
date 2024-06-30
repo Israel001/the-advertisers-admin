@@ -19,6 +19,7 @@ const Order = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [orderSelected, setOrderSelected] = useState<number>();
   const [orderSelectedDetails, setOrderSelectedDetails] = useState();
+  const [orderStatus, setOrderStatus] = useState('');
 
   const [forceRefresh, setForceRefresh] = useState(false);
   const [page, setPage] = useState(1);
@@ -97,6 +98,7 @@ const Order = () => {
                       }}
                       onClick={() => {
                         setOrderSelected(row.id);
+                        setOrderStatus(row.status);
                         setOrderSelectedDetails(JSON.parse(row?.details));
                         setShowDetailsModal(true);
                       }}
@@ -120,6 +122,8 @@ const Order = () => {
         showModal={showDetailsModal}
         setShowModal={setShowDetailsModal}
         orderDetails={orderSelectedDetails}
+        orderId={orderSelected}
+        status={orderStatus}
       />
     </div>
   );
