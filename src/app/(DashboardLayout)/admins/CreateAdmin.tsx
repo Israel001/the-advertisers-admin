@@ -21,16 +21,18 @@ const CreateAdmin = ({ showModal, setShowModal }: ICreateAdminProps) => {
   const [nameError, setNameError] = useState('Full name is required');
   const [emailError, setEmailError] = useState('Email is required');
   const [passwordError, setPasswordError] = useState('Password is required');
+  const [phoneError, setPhoneError] = useState('Phone Number is required');
   const [rolesError, setRolesError] = useState('Role is required');
+  const [phone, setPhone] = useState('');
   const [allRoles, setAllRoles] = useState<IRoles[]>([]);
   const [selectedRole, setSelectedRole] = useState('');
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    if (!nameError && !emailError && !passwordError && !rolesError) {
+    if (!nameError && !emailError && !passwordError && !rolesError && !phoneError) {
       axios
         .post(
           `${ServerRoutes.baseUrl}`,
-          { fullName: name, email, password, roleId: Number(selectedRole) },
+          { fullName: name, email, password, roleId: Number(selectedRole), phone },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -77,7 +79,6 @@ const CreateAdmin = ({ showModal, setShowModal }: ICreateAdminProps) => {
   useEffect(() => {
     fetchAllRoles();
   }, []);
-
 
   return (
     <Modal isOpen={showModal} onCloseModal={() => setShowModal(false)} text="">
@@ -168,6 +169,26 @@ const CreateAdmin = ({ showModal, setShowModal }: ICreateAdminProps) => {
               ))}
             </select>
             {rolesError && <span style={{ color: 'red' }}>{rolesError}</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="phone">Phone Number:</label>
+            <input
+              type="text"
+              id="phone"
+              value={phone}
+              onChange={(e) => {
+                e.target.value.trim()
+                  ? setPhoneError('')
+                  : setPhoneError('Phone Number is required');
+                setPhone(e.target.value);
+              }}
+              style={
+                phoneError ? { border: '1px solid red', color: 'red' } : {}
+              }
+            />
+            {phoneError && (
+              <span style={{ color: 'red' }}>{phoneError}</span>
+            )}
           </div>
           <div className={styles.btnContainer}>
             <button type="submit">Submit</button>

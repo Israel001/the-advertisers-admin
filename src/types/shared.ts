@@ -33,6 +33,7 @@ export interface IAdmin {
   email: string;
   createdAt: string;
   role: { name: string };
+  phone: string;
 }
 
 export interface ICustomer {

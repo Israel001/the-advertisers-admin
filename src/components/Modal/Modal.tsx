@@ -9,9 +9,27 @@ type ModalProps = {
   onCloseModal?: any;
   responsiveStyle?: 'tray' | 'centred';
   noBorderRadius?: boolean;
+  width?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 };
 
 const Modal = (props: ModalProps) => {
+  const getWidthClass = () => {
+    switch (props.width) {
+      case 'sm':
+        return 'max-w-sm';
+      case 'md':
+        return 'max-w-md';
+      case 'lg':
+        return 'max-w-lg';
+      case 'xl':
+        return 'w-[70vw]';
+      case 'full':
+        return 'w-full';
+      default:
+        return 'w-full';
+    }
+  };
+
   return (
     <Transition appear show={props.isOpen} as={Fragment}>
       <Dialog
@@ -47,13 +65,13 @@ const Modal = (props: ModalProps) => {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel
-                className={`w-max transform overflow-hidden ${
+                className={`transform overflow-hidden ${getWidthClass()} ${
                   props.responsiveStyle === 'tray'
                     ? 'rounded-t-3xl md:rounded-xl '
                     : props.noBorderRadius
                     ? 'rounded-none'
                     : 'rounded-xl'
-                } bg-white  text-left align-middle shadow-xl transition-all`}
+                } bg-white text-left align-middle shadow-xl transition-all`}
               >
                 <Dialog.Title
                   as="h3"

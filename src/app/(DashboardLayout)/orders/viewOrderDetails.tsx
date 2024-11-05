@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from '@/components/Modal/Modal';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { formatWithNaira } from '@/libs/utils';
@@ -22,12 +22,95 @@ function ViewOrderDetails({
   status,
 }: IOrderViewDetailsProps) {
   const router = useRouter();
+  const [courers, setCourers] = useState([]);
+  const [selectedCourers, setSelectedCourers] = useState<{
+    [key: string]: string;
+  }>({});
+
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      const response = await axios.get(`${ServerRoutes.baseUrl}/fetch-admins`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        params: {
+          'pagination[page]': 1,
+          'pagination[limit]': 40,
+        },
+      });
+      const filteredAdmins = response.data.data.filter(
+        (admin: any) => admin.role?.id === 6,
+      );
+      console.log('Admins:', filteredAdmins);
+      setCourers(filteredAdmins);
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+    }
+  };
+
+  const handleAssignCourer = (
+    event: any,
+    storeId: string,
+    orderDetails: any,
+  ) => {
+    const selectedAgentId = event.target.value;
+    setSelectedCourers((prev) => ({
+      ...prev,
+      [storeId]: selectedAgentId,
+    }));
+    assignShopToCourier(storeId, selectedAgentId);
+    console.log('Assigned Admin ID for storeId', storeId, ':', selectedAgentId);
+  };
+
+  const assignShopToCourier = async (storeId: any, agentId: any) => {
+    console.log('Unique Stores:', uniqueStores);
+    try {
+      const response = await axios.post(
+        `${ServerRoutes.getOrderData}/${orderId}/store/${storeId}/assign-to-agent/${agentId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+          params: {
+            id: orderId,
+            storeId: storeId,
+            agentId: agentId,
+          },
+        },
+      );
+      console.log('Assigned:', response);
+    } catch (error) {
+      console.error('Error assigning agent to store:', error);
+    }
+  };
+
+  const uniqueStores = Array.from(
+    new Map(
+      orderDetails?.cart?.map((item: any) => [
+        item.storeName,
+        {
+          storeName: item.storeName,
+          storeId: item.storeId,
+        },
+      ]),
+    ).values(),
+  );
 
   return (
-    <Modal isOpen={showModal} onCloseModal={() => setShowModal(false)} text="">
+    <Modal
+      isOpen={showModal}
+      onCloseModal={() => setShowModal(false)}
+      text=""
+      width="xl"
+    >
       <div
         className="px-[40px] py-[30px]"
-        style={{ maxHeight: '500px', width: '800px', overflowY: 'scroll' }}
+        style={{ maxHeight: '700px', width: '100%', overflowY: 'scroll' }}
       >
         <button
           style={{
@@ -130,14 +213,14 @@ function ViewOrderDetails({
                     ) : (
                       <button
                         style={{
-                          fontSize: '11px',
+                          fontSize: '15px',
                           color: 'white',
                           padding: '5px 10px',
                           borderRadius: '10px',
                           backgroundColor: '#0056b3',
                           outline: 'none',
                           marginLeft: '15px',
-                          width: '120px',
+                          width: '220px',
                         }}
                         onClick={(event) => {
                           event.preventDefault();
@@ -178,147 +261,79 @@ function ViewOrderDetails({
                   )}
                 </div>
 
-                <div className="w-full px-10 py-[30px] border border-[#EDEDED]">
-                  <div className="sub-total mb-6">
-                    <div className=" flex justify-between mb-5">
-                      <p className="text-[13px] font-medium text-qblack uppercase">
-                        product
-                      </p>
-                      <div
-                        style={{
-                          display: 'flex',
-                          width: '31%',
-                          justifyContent: 'space-between',
-                        }}
-                      >
-                        <p className="text-[13px] font-medium text-qblack uppercase">
-                          total
-                        </p>
-                        <p className="text-[13px] font-medium text-qblack uppercase">
-                          status
-                        </p>
-                      </div>
-                    </div>
-                    <div className="w-full h-[1px] bg-[#EDEDED]"></div>
-                  </div>
-                  <div className="product-list w-full mb-[30px]">
-                    <ul className="flex flex-col space-y-5">
-                      {orderDetails?.cart?.map((x: any, idx: any) => {
-                        console.log('x', x);
-                        return (
-                          <a
-                            key={idx}
-                            href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/single-product/${x.id}`}
-                          >
-                            <li>
-                              <div className="flex justify-between items-center gap-14">
-                                <div className="w-[80px] h-[80px] overflow-hidden flex justify-center items-center border border-[#EDEDED]">
-                                  <img
-                                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${x.image}`}
-                                    alt="product"
-                                    className="w-full h-full object-contain"
-                                  />
-                                </div>
-                                <div>
-                                  <h4 className="text-[15px] text-left text-qblack mb-2.5 flex items-center">
-                                    <span className="w-[250px] whitespace-nowrap overflow-hidden overflow-ellipsis block">
-                                      {x?.name}
-                                    </span>
+                <hr className="mb-[40px]" />
 
-                                    <sup className="text-[13px] text-qgray ml-2 mt-2">
-                                      x{x.quantity}
-                                    </sup>
-                                  </h4>
-                                </div>
-                                <div className="flex items-center">
-                                  <span className="text-[15px] text-qblack font-medium">
-                                    {formatWithNaira(parseFloat(x.price))}
-                                  </span>
-                                  <button
-                                    style={{
-                                      fontSize: '11px',
-                                      color: 'white',
-                                      padding: '5px 10px',
-                                      borderRadius: '10px',
-                                      backgroundColor: '#333',
-                                      outline: 'none',
-                                      marginLeft: '15px',
-                                      width: '120px',
-                                    }}
-                                    onClick={(event) => {
-                                      event.preventDefault();
-                                    }}
-                                  >
-                                    {x.status ? x.status : 'PENDING'}
-                                  </button>
-                                </div>
+                <div className="product-list w-full mb-[30px]">
+                  {uniqueStores.map((store: any, idx) => (
+                    <div key={idx} className="mb-6">
+                      <h2 className="text-[25px] text-left text-qblack mb-2.5">
+                        {store.storeName}
+                      </h2>
+
+                      <div className="relative group mb-3">
+                        <select
+                          id={`adminSelect-${store.storeName}`}
+                          value={selectedCourers[store.storeId] || ''}
+                          onChange={(event) =>
+                            handleAssignCourer(
+                              event,
+                              store?.storeId,
+                              orderDetails,
+                            )
+                          }
+                          className="block w-full p-2 border border-gray-300 rounded"
+                        >
+                          <option value="">
+                            Assign courier for {store.storeName}
+                          </option>
+                          {courers.length > 0 ? (
+                            courers.map((courer: any) => (
+                              <option key={courer?.id} value={courer.id}>
+                                {courer.fullName}
+                              </option>
+                            ))
+                          ) : (
+                            <option disabled>No couriers found</option>
+                          )}
+                        </select>
+                      </div>
+
+                      <ul className="flex flex-col space-y-5">
+                        {orderDetails?.cart
+                          ?.filter(
+                            (item: any) => item.storeName === store.storeName,
+                          )
+                          .map((item: any, idx: any) => (
+                            <li
+                              key={idx}
+                              className="flex justify-between items-center gap-14"
+                            >
+                              <div className="w-[80px] h-[80px] overflow-hidden flex justify-center items-center border border-[#EDEDED]">
+                                <img
+                                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${item.image}`}
+                                  alt="product"
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div>
+                                <h4 className="text-[15px] text-left text-qblack mb-2.5">
+                                  {item.name}{' '}
+                                  <sup className="text-[13px] text-qgray ml-2">
+                                    x{item.quantity}
+                                  </sup>
+                                </h4>
+                              </div>
+                              <div className="flex items-center">
+                                <span className="text-[15px] text-qblack font-medium">
+                                  {formatWithNaira(parseFloat(item.price))}
+                                </span>
                               </div>
                             </li>
-                          </a>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                  <div className="w-full h-[1px] bg-[#EDEDED]"></div>
-
-                  <div className="mt-[30px]">
-                    <div className=" flex justify-between mb-5">
-                      <p className="text-[13px] font-medium text-qblack uppercase">
-                        SUBTOTAL
-                      </p>
-                      <p className="text-[15px] font-medium text-qblack uppercase">
-                        {formatWithNaira(
-                          parseFloat(
-                            orderDetails?.cart?.reduce(
-                              (prev: any, cur: { total: any }) =>
-                                prev + cur.total,
-                              0,
-                            ),
-                          ),
-                        )}
-                      </p>
+                          ))}
+                      </ul>
+                      <hr className="mx-[20px] my-[50px]" />
                     </div>
-                  </div>
-
-                  <div className="w-full mt-[30px]">
-                    <div className="flex justify-between sub-total mb-6">
-                      <span className="text-[15px] font-medium text-qblack mb-[18px] block">
-                        Shipping (
-                        {`${orderDetails?.shipping?.type
-                          .split('_')
-                          .map(
-                            (s: string) =>
-                              s.charAt(0).toUpperCase() + s.slice(1),
-                          )
-                          .join(' ')}`}
-                        )
-                      </span>
-                      <span className="text-[15px] text-normal text-qgraytwo">
-                        {formatWithNaira(
-                          parseFloat(orderDetails?.shipping?.amount),
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-[30px]">
-                    <div className=" flex justify-between mb-5">
-                      <p className="text-[13px] font-medium text-qblack uppercase">
-                        TOTAL
-                      </p>
-                      <p className="text-[15px] font-medium text-qblack uppercase">
-                        {formatWithNaira(
-                          parseFloat(
-                            orderDetails?.cart?.reduce(
-                              (prev: any, cur: { total: any }) =>
-                                prev + cur.total,
-                              0,
-                            ) + orderDetails?.shipping?.amount,
-                          ),
-                        )}
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>

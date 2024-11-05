@@ -129,11 +129,16 @@ const Admin = () => {
               },
               {
                 id: 5,
+                label: 'Phone Number',
+              },
+              {
+                id: 6,
                 label: 'Created At',
               },
+              
               roleName === 'Super Admin'
                 ? {
-                    id: 6,
+                    id: 7,
                     label: 'Actions',
                   }
                 : '',
@@ -146,6 +151,7 @@ const Admin = () => {
                   <td>{row.fullName}</td>
                   <td>{row.email}</td>
                   <td>{row.role?.name}</td>
+                  <td>{row?.phone}</td>
                   <td>{row.createdAt.split('T')[0]}</td>
                   {roleName === 'Super Admin' && (
                     <td>
