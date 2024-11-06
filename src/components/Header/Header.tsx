@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useState } from 'react';
 import styles from './header.module.scss';
 import { useRouter } from 'next/navigation';
@@ -8,38 +10,30 @@ let sidebarItems = [
   {
     name: 'Product',
     href: '/product',
-    subMenu: [],
   },
   {
     name: 'Main Category',
     href: '/mainCategory',
-    subMenu: [],
   },
   {
     name: 'Sub Category',
     href: '/subCategory',
-    subMenu: [],
   },
-
-  // {
-  //   name: 'Admins',
-  //   href: '/admins',
-  //   subMenu: [],
-  // },
   {
     name: 'Customers',
     href: '/customers',
-    subMenu: [],
   },
   {
     name: 'Stores',
     href: '/stores',
-    subMenu: [],
   },
   {
     name: 'Orders',
     href: '/orders',
-    subMenu: [],
+  },
+  {
+    name: 'Delivery',
+    href: '/delivery',
   },
 ];
 
@@ -57,7 +51,16 @@ const Header: React.FC = () => {
     } else {
       console.error('User data not found in local storage');
     }
-  }, [roleName]);
+  }, []);
+
+  // Filter sidebar items based on role
+  const filteredSidebarItems = sidebarItems.filter((item) => {
+    if (roleName === 'Delivery Agent') {
+      // Customize items visible to Delivery Agent
+      return item.name === 'Delivery'
+    }
+    return true; // Allow all items for other roles
+  });
 
   return (
     <div className={styles.navbar}>
@@ -78,7 +81,7 @@ const Header: React.FC = () => {
         </div>
       </div>
       <div className={styles.lowerSection}>
-        {sidebarItems.map(({ name, href }) => {
+        {filteredSidebarItems.map(({ name, href }) => {
           const parts = pathname.split('/').filter(Boolean);
           const firstPart = parts[0];
           const isActiveLink = `/${firstPart}` === href;
@@ -96,10 +99,10 @@ const Header: React.FC = () => {
           );
         })}
         {roleName === 'Super Admin' && (
-          <Link href="/admins" className={`${styles.navLink} `}>
+          <Link href="/admins" className={`${styles.navLink}`}>
             Admins
           </Link>
-        )}{' '}
+        )}
       </div>
     </div>
   );

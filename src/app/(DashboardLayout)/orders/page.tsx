@@ -104,7 +104,6 @@ const Order = () => {
               { id: 3, label: 'Status' },
               { id: 4, label: 'Amount' },
               { id: 5, label: 'Actions' },
-              { id: 6, label: 'Assign To Courier' },
             ]}
             data={orderData}
             renderRow={(row: IOrder, index: number) => (
@@ -130,7 +129,7 @@ const Order = () => {
                     View Details
                   </span>
                 </td>
-                <td>
+                {/* <td>
                   <div>
                     <select
                       id="adminSelect"
@@ -149,7 +148,7 @@ const Order = () => {
                       ))}
                     </select>
                   </div>
-                </td>
+                </td> */}
               </tr>
             )}
           />

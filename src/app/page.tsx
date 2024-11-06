@@ -12,7 +12,6 @@ const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     axios
@@ -21,9 +20,16 @@ const LoginPage = () => {
         localStorage.setItem('accessToken', response?.data?.accessToken);
         localStorage.setItem('user', JSON.stringify(response?.data?.user));
         localStorage.setItem('date', new Date().getTime().toString());
-        response?.data?.user?.role?.name === 'Simple User'
-          ? router.push('customers')
-          : router.push('product');
+
+        const roleName = response?.data?.user?.role?.name;
+
+        if (roleName === 'Simple User') {
+          router.push('customers');
+        } else if (roleName === 'Delivery Agent') {
+          router.push('delivery');
+        } else {
+          router.push('product');
+        }
       })
       .catch((error) => {
         alert(error.response?.data?.message);
