@@ -269,11 +269,18 @@ function ViewOrderDetails({
                       <h2 className="text-[25px] text-left text-qblack mb-2.5">
                         {store.storeName}
                       </h2>
-
+                      Status:{' '}
+                      {orderDetails.cart.find(
+                        (c: any) => c.storeId === store.storeId,
+                      ).status || 'PENDING'}
                       <div className="relative group mb-3">
                         <select
                           id={`adminSelect-${store.storeName}`}
-                          value={selectedCourers[store.storeId] || ''}
+                          value={
+                            orderDetails.cart.find(
+                              (c: any) => c.storeId === store.storeId,
+                            ).agentId || ''
+                          }
                           onChange={(event) =>
                             handleAssignCourer(
                               event,
@@ -297,7 +304,6 @@ function ViewOrderDetails({
                           )}
                         </select>
                       </div>
-
                       <ul className="flex flex-col space-y-5">
                         {orderDetails?.cart
                           ?.filter(
