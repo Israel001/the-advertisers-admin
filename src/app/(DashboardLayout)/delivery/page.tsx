@@ -61,7 +61,7 @@ const Delivery = () => {
     const fetchOrders = async () => {
       setLoading(true);
       try {
-        const url = `${ServerRoutes.getOrderData}s?pagination[page]=${page}&pagination[limit]=${limit}`;
+        const url = `${ServerRoutes.baseUrl}/deliveries`;
         const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -195,7 +195,7 @@ const Delivery = () => {
             )}
           </section>
 
-          <section>
+          {/* <section>
             <h3 className="text-xl font-semibold text-green-600 mb-4">
               Orders to be Taken to Customers
             </h3>
@@ -248,7 +248,7 @@ const Delivery = () => {
                 No orders to take to customers.
               </p>
             )}
-          </section>
+          </section> */}
         </>
       )}
     </div>

@@ -274,35 +274,42 @@ function ViewOrderDetails({
                         (c: any) => c.storeId === store.storeId,
                       ).status || 'PENDING'}
                       <div className="relative group mb-3">
-                        <select
-                          id={`adminSelect-${store.storeName}`}
-                          value={
-                            orderDetails.cart.find(
-                              (c: any) => c.storeId === store.storeId,
-                            ).agentId || ''
-                          }
-                          onChange={(event) =>
-                            handleAssignCourer(
-                              event,
-                              store?.storeId,
-                              orderDetails,
-                            )
-                          }
-                          className="block w-full p-2 border border-gray-300 rounded"
-                        >
-                          <option value="">
-                            Assign courier for {store.storeName}
-                          </option>
-                          {courers.length > 0 ? (
-                            courers.map((courer: any) => (
-                              <option key={courer?.id} value={courer.id}>
-                                {courer.fullName}
-                              </option>
-                            ))
-                          ) : (
-                            <option disabled>No couriers found</option>
-                          )}
-                        </select>
+                        {orderDetails.cart.find(
+                          (c: any) => c.storeId === store.storeId,
+                        ).status ? (
+                          <select
+                            id={`adminSelect-${store.storeName}`}
+                            value={
+                              orderDetails.cart.find(
+                                (c: any) => c.storeId === store.storeId,
+                              ).agentId || ''
+                            }
+                            onChange={(event) =>
+                              handleAssignCourer(
+                                event,
+                                store?.storeId,
+                                orderDetails,
+                              )
+                            }
+                            className="block w-full p-2 border border-gray-300 rounded"
+                          >
+                            <option value="">
+                              Assign courier for {store.storeName}
+                            </option>
+                            {courers.length > 0 ? (
+                              courers.map((courer: any) => (
+                                <option key={courer?.id} value={courer.id}>
+                                  {courer.fullName}
+                                </option>
+                              ))
+                            ) : (
+                              <option disabled>No couriers found</option>
+                            )}
+                          </select>
+                        ) : (
+                          <>
+                          </>
+                        )}
                       </div>
                       <ul className="flex flex-col space-y-5">
                         {orderDetails?.cart

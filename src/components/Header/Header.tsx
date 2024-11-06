@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import styles from './header.module.scss';
@@ -57,9 +57,16 @@ const Header: React.FC = () => {
   const filteredSidebarItems = sidebarItems.filter((item) => {
     if (roleName === 'Delivery Agent') {
       // Customize items visible to Delivery Agent
-      return item.name === 'Delivery'
+      return item.name === 'Delivery';
     }
-    return true; // Allow all items for other roles
+    return (
+      item.name === 'Product' ||
+      item.name === 'Main Category' ||
+      item.name === 'Sub Category' ||
+      item.name === 'Customers' ||
+      item.name === 'Stores' ||
+      item.name === 'Orders'
+    );
   });
 
   return (
