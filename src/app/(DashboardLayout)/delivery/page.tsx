@@ -1,53 +1,38 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { ServerRoutes } from '@/libs/app_routes';
 import { useRouter } from 'next/navigation';
 
 const Delivery = () => {
-  interface PersonalDetails {
-    full_name: string;
-    address: string;
-    phone: string;
-  }
-
   interface CartItem {
     id: string;
     name: string;
     quantity: number;
-    adminUser: {
-      id: string;
-      email: string;
-      fullName: string;
-    };
-    storeName: string;
+    agentId: number;
   }
 
-  interface Order {
-    id: string;
-    personalDetails: PersonalDetails;
+  interface OrderItem {
+    orderId: number;
     details: CartItem[];
-    adminUser: {
-      id: string;
-      email: string;
-      fullName: string;
-    };
-  }
-
-  interface Delivery {
-    orderId: string;
-    items: {};
-    personalDetails: PersonalDetails;
+    status: string;
+    storeName: string;
+    storePhone: string;
+    storeAddress: string;
+    storeId: string;
+    id: string;
   }
 
   const router = useRouter();
-  const [deliveriesFromStores, setDeliveriesFromStores] = useState<any>([]);
-  const [ordersToCustomers, setOrdersToCustomers] = useState<any>([]);
+  const [deliveriesFromStores, setDeliveriesFromStores] = useState<
+    Record<string, OrderItem[]>
+  >({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [deliveryAgentId, setDeliveryAgentId] = useState<string | null>(null);
+  const [buttonText, setButtonText] = useState<string>('');
 
   useEffect(() => {
     const userString = localStorage.getItem('user');
@@ -55,89 +40,144 @@ const Delivery = () => {
     setDeliveryAgentId(userId);
   }, []);
 
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const url = `${ServerRoutes.baseUrl}/deliveries`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      console.log('Response:', response.data);
+      const orders: any = response.data.flatMap((order: any) => {
+        return order.cartItems.map((item: any) => {
+          return {
+            orderId: order.orderId,
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            storeName: item.storeName,
+            storePhone: item.storePhone,
+            storeAddress: item.storeaddress,
+            status: item.status,
+          };
+        });
+      });
+      console.log(orders);
+
+      const groupedDeliveries: Record<any, any> = {};
+      orders?.forEach((item: any) => {
+        const store = item.storeName;
+        if (!groupedDeliveries[store]) {
+          groupedDeliveries[store] = [];
+        }
+        groupedDeliveries[store].push(item);
+      });
+
+      console.log('Grouped deliveries:', groupedDeliveries);
+
+      setDeliveriesFromStores(groupedDeliveries);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('date');
+        router.push('/');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!deliveryAgentId) return;
-
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        const url = `${ServerRoutes.baseUrl}/deliveries`;
-        const response = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        });
-
-        const orders: Order[] = response.data.data;
-        console.log(orders);
-
-        const deliveriesToBeReceived = orders
-          .filter((order) => order.adminUser?.id === deliveryAgentId)
-          .map((order) => ({
-            orderId: order.id,
-            items:
-              typeof order.details === 'string'
-                ? JSON.parse(order.details)
-                : order.details,
-            personalDetails: order.adminUser,
-          }));
-        console.log(deliveriesToBeReceived, 'deliveriesToBeReceived');
-
-        const ordersToDeliver = orders
-          .filter((order: any) => {
-            const orderDetails =
-              typeof order.details === 'string'
-                ? JSON.parse(order.details)
-                : order.details;
-
-            return orderDetails.cart.some(
-              (product: any) => product.adminUserId === deliveryAgentId,
-            );
-          })
-          .map((order: any) => ({
-            id: order.id,
-            personalDetails: order.personalDetails,
-            adminUser: order.adminUser,
-            items:
-              typeof order.details === 'string'
-                ? JSON.parse(order.details)
-                : order.details,
-          }));
-
-        console.log(ordersToDeliver, 'ordersToDeliver');
-        setDeliveriesFromStores(deliveriesToBeReceived);
-        setOrdersToCustomers(ordersToDeliver);
-
-        console.log(deliveriesFromStores, 'deliveriesFromStores');
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('user');
-          localStorage.removeItem('date');
-          router.push('/');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchOrders();
   }, [page, deliveryAgentId]);
 
-  const groupedDeliveries = deliveriesFromStores.reduce(
-    (acc: any, order: any) => {
-      order.items.cart
-        .filter((item: any) => item.adminUserId === deliveryAgentId)
-        .forEach((item: any) => {
-          const store = item.storeName;
-          if (!acc[store]) {
-            acc[store] = [];
-          }
-          acc[store].push(item);
-        });
-      return acc;
+  const handleReceiveFromStore = async (
+    orderId: number,
+    products: number[],
+  ) => {
+    try {
+      // Call the API to collect the product from the store
+      await axios.post(
+        `${ServerRoutes.baseUrl}/order/${orderId}/collect-product-from-seller`,
+        { products },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      );
+
+      setButtonText('Dropped at Distribution Center');
+      alert('Product collected from store');
+    } catch (error) {
+      console.error('Error collecting product from store:', error);
+    }
+  };
+
+  const handleDropAtDistributionCenter = async (
+    orderId: number,
+    products: number[],
+  ) => {
+    try {
+      // Call the API to drop the product at the distribution center
+      await axios.post(
+        `${ServerRoutes.baseUrl}/order/${orderId}/drop-product-at-distribution-center`,
+        { products },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      );
+
+      fetchOrders();
+    } catch (error) {
+      console.error('Error dropping product at distribution center:', error);
+    }
+  };
+
+  const renderButton = useCallback(
+    (status: string, orderId: number, products: number[]) => {
+      switch (status) {
+        case 'Given to courier':
+          return (
+            <button
+              onClick={() => handleReceiveFromStore(orderId, products)}
+              className="p-[15px] text-white bg-blue-600 rounded-[20px]"
+            >
+              {buttonText !== '' ? buttonText : 'Receive from Store'}
+            </button>
+          );
+        case 'PRODUCT_COLLECTED_FROM_SELLER_BY_DELIVERY_AGENT':
+          return (
+            <button
+              onClick={() => handleDropAtDistributionCenter(orderId, products)}
+              className="p-[15px] text-white bg-blue-600 rounded-[20px]"
+            >
+              {buttonText !== ''
+                ? buttonText
+                : 'Dropped at distribution center'}
+            </button>
+          );
+        case 'PRODUCT_DROPPED_AT_DISTRIBUTION_CENTER_BY_DELIVERY_AGENT':
+          return (
+            <span className="text-gray-500">
+              {buttonText !== ''
+                ? buttonText
+                : 'Product dropped at distribution center'}
+            </span>
+          );
+        default:
+          return null;
+      }
     },
-    {},
+    [buttonText],
   );
 
   return (
@@ -154,101 +194,48 @@ const Delivery = () => {
                 Deliveries to be Received from Stores
               </h3>
             </div>
-            {Object.keys(groupedDeliveries).length > 0 ? (
-              Object.entries(groupedDeliveries).map(
-                ([storeName, items]: [string, any]) => (
-                  <div key={storeName} className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-blue-600 mb-4">
-                        {storeName}
-                      </h3>
-                      <button className="p-[15px] text-white bg-blue-400 rounded-[20px]">
-                        Received from store
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      {items.map((item: any) => (
-                        <div
-                          key={item.id}
-                          className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm"
-                        >
-                          <p className="text-gray-700 font-medium">
-                            Item: {item.name}
-                          </p>
-                          <p className="text-gray-600">
-                            Quantity: {item.quantity}
-                          </p>
-                          <p className="text-gray-600">
-                            Store: {item.storeName}
-                          </p>
-                        </div>
-                      ))}
+            {Object.keys(deliveriesFromStores).length > 0 ? (
+              Object.entries(deliveriesFromStores).map(([storeName, items]) => (
+                <div key={storeName} className="mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-blue-600 mb-4">
+                      {storeName}
+                    </h3>
+                    <div className="mt-4">
+                      {renderButton(
+                        items[0].status,
+                        items[0].orderId,
+                        items.map((i) => Number(i.id)),
+                      )}
                     </div>
                   </div>
-                ),
-              )
+                  <div className="text-gray-600 mb-2">
+                    <p>Phone: {items[0]?.storePhone}</p>
+                    <p>Address: {items[0]?.storeAddress}</p>
+                  </div>
+                  <div className="space-y-4">
+                    {items.map((item: any) => (
+                      <div
+                        key={item.id}
+                        className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm"
+                      >
+                        <p className="text-gray-700 font-medium">
+                          Item: {item.name}
+                        </p>
+                        <p className="text-gray-600">
+                          Quantity: {item.quantity}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
             ) : (
               <p className="text-center text-gray-500">
                 No deliveries to receive from stores.
               </p>
             )}
           </section>
-
-          {/* <section>
-            <h3 className="text-xl font-semibold text-green-600 mb-4">
-              Orders to be Taken to Customers
-            </h3>
-            {ordersToCustomers.length > 0 ? (
-              <div className="space-y-4">
-                {ordersToCustomers
-                  .filter(
-                    (order: any) => order.adminUser?.id === deliveryAgentId,
-                  )
-                  .map((order: any) => (
-                    <div
-                      key={order.id}
-                      className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm"
-                    >
-                      <p className="font-semibold text-gray-700">
-                        Order ID: {order.id}
-                      </p>
-                      <p className="text-gray-600">
-                        Customer: {order.items.personalDetails.full_name}
-                      </p>
-                      <p className="text-gray-600">
-                        Address: {order.items.personalDetails.address}
-                      </p>
-                      <p className="text-gray-600">
-                        Phone Number: +{order.items.personalDetails.phone}
-                      </p>
-                      <div className="space-y-2 mt-2">
-                        {order.items.cart.map((item: any) => (
-                          <div
-                            key={item.id}
-                            className="border-t border-gray-100 pt-2"
-                          >
-                            <p className="text-gray-700 font-medium">
-                              Item: {item.name}
-                            </p>
-                            <p className="text-gray-600">
-                              Quantity: {item.quantity}
-                            </p>
-                            <p className="text-gray-600">
-                              Store: {item.storeName}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500">
-                No orders to take to customers.
-              </p>
-            )}
-          </section> */}
         </>
       )}
     </div>

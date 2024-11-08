@@ -204,60 +204,79 @@ function ViewOrderDetails({
                     Order Summary
                   </h1>
                   {orderDetails?.cart?.every(
-                    (c: any) =>
-                      c.status !==
-                      'Mark order as packed, waiting for courier...',
+                    (c: any) =>  status === 'PICKED_UP',
                   ) ? (
-                    status === 'SENT_FOR_DELIVERY' ? (
-                      <span style={{ color: 'green' }}>Sent for Delivery</span>
-                    ) : (
-                      <button
-                        style={{
-                          fontSize: '15px',
-                          color: 'white',
-                          padding: '5px 10px',
-                          borderRadius: '10px',
-                          backgroundColor: '#0056b3',
-                          outline: 'none',
-                          marginLeft: '15px',
-                          width: '220px',
-                        }}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          axios
-                            .put(
-                              `${ServerRoutes.getOrderData}/${orderId}/${
-                                status === 'PACKED_AND_READY_TO_SEND'
-                                  ? 'SENT_FOR_DELIVERY'
-                                  : 'PACKED_AND_READY_TO_SEND'
-                              }`,
-                              {},
-                              {
-                                headers: {
-                                  Authorization: `Bearer ${localStorage.getItem(
-                                    'accessToken',
-                                  )}`,
-                                },
-                              },
-                            )
-                            .then(() => location.reload())
-                            .catch((error) => {
-                              if (error.response?.data?.statusCode === 401) {
-                                localStorage.removeItem('accessToken');
-                                localStorage.removeItem('user');
-                                localStorage.removeItem('date');
-                                router.push('/');
-                              }
-                            });
-                        }}
-                      >
-                        {status === 'PACKED_AND_READY_TO_SEND'
-                          ? 'Mark order as sent for delivery'
-                          : 'Mark order as packed and ready to send'}
-                      </button>
-                    )
+                    <span style={{ color: 'green' }}>Picked Up</span>
                   ) : (
-                    <></>
+                    <button
+                      style={{
+                        fontSize: '15px',
+                        color: 'white',
+                        padding: '5px 10px',
+                        borderRadius: '10px',
+                        backgroundColor: orderDetails?.cart?.some(
+                          (c: any) =>
+                            c.status !==
+                            'PRODUCT_DROPPED_AT_DISTRIBUTION_CENTER_BY_DELIVERY_AGENT',
+                        )
+                          ? '#c0c0c0'
+                          : '#0056b3',
+                        outline: 'none',
+                        marginLeft: '15px',
+                        width: '220px',
+                        cursor: orderDetails?.cart?.some(
+                          (c: any) =>
+                            c.status !==
+                            'PRODUCT_DROPPED_AT_DISTRIBUTION_CENTER_BY_DELIVERY_AGENT',
+                        )
+                          ? 'not-allowed'
+                          : 'pointer',
+                        opacity: orderDetails?.cart?.some(
+                          (c: any) =>
+                            c.status !==
+                            'PRODUCT_DROPPED_AT_DISTRIBUTION_CENTER_BY_DELIVERY_AGENT',
+                        )
+                          ? 0.6
+                          : 1,
+                      }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        axios
+                          .put(
+                            `${ServerRoutes.getOrderData}/${orderId}/${
+                              status === 'PACKED_AND_READY_TO_PICKUP'
+                                ? 'PICKED_UP'
+                                : 'PACKED_AND_READY_TO_PICKUP'
+                            }`,
+                            {},
+                            {
+                              headers: {
+                                Authorization: `Bearer ${localStorage.getItem(
+                                  'accessToken',
+                                )}`,
+                              },
+                            },
+                          )
+                          .then(() => location.reload())
+                          .catch((error) => {
+                            if (error.response?.data?.statusCode === 401) {
+                              localStorage.removeItem('accessToken');
+                              localStorage.removeItem('user');
+                              localStorage.removeItem('date');
+                              router.push('/');
+                            }
+                          });
+                      }}
+                      disabled={orderDetails?.cart?.some(
+                        (c: any) =>
+                          c.status !==
+                          'PRODUCT_DROPPED_AT_DISTRIBUTION_CENTER_BY_DELIVERY_AGENT',
+                      )}
+                    >
+                      {status === 'PACKED_AND_READY_TO_PICKUP'
+                        ? 'Mark order as picked up'
+                        : 'Mark order as packed and ready for pickup'}
+                    </button>
                   )}
                 </div>
 
@@ -276,11 +295,15 @@ function ViewOrderDetails({
                       <div className="relative group mb-3">
                         {orderDetails.cart.find(
                           (c: any) => c.storeId === store.storeId,
-                        ).status ? (
+                        ).status &&
+                        orderDetails.cart.find(
+                          (c: any) => c.storeId === store.storeId,
+                        ).status !==
+                          'PRODUCT_DROPPED_AT_DISTRIBUTION_CENTER_BY_DELIVERY_AGENT' ? (
                           <select
                             id={`adminSelect-${store.storeName}`}
                             value={
-                              orderDetails.cart.find(
+                              selectedCourers[store.storeId] || orderDetails.cart.find(
                                 (c: any) => c.storeId === store.storeId,
                               ).agentId || ''
                             }
@@ -307,8 +330,7 @@ function ViewOrderDetails({
                             )}
                           </select>
                         ) : (
-                          <>
-                          </>
+                          <></>
                         )}
                       </div>
                       <ul className="flex flex-col space-y-5">
