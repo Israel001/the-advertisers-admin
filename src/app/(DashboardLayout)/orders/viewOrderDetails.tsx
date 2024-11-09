@@ -67,7 +67,6 @@ function ViewOrderDetails({
   };
 
   const assignShopToCourier = async (storeId: any, agentId: any) => {
-    console.log('Unique Stores:', uniqueStores);
     try {
       const response = await axios.post(
         `${ServerRoutes.getOrderData}/${orderId}/store/${storeId}/assign-to-agent/${agentId}`,
@@ -96,10 +95,13 @@ function ViewOrderDetails({
         {
           storeName: item.storeName,
           storeId: item.storeId,
+          storeAddress: item.storeAddress,
+          storePhone: item.storePhone,
         },
       ]),
     ).values(),
   );
+
 
   return (
     <Modal
@@ -204,7 +206,7 @@ function ViewOrderDetails({
                     Order Summary
                   </h1>
                   {orderDetails?.cart?.every(
-                    (c: any) =>  status === 'PICKED_UP',
+                    (c: any) => status === 'PICKED_UP',
                   ) ? (
                     <span style={{ color: 'green' }}>Picked Up</span>
                   ) : (
@@ -248,7 +250,9 @@ function ViewOrderDetails({
                                 ? 'PICKED_UP'
                                 : 'PACKED_AND_READY_TO_PICKUP'
                             }`,
-                            {},
+                            {
+                              storeId: Number(orderDetails.cart[0].storeId),
+                            },
                             {
                               headers: {
                                 Authorization: `Bearer ${localStorage.getItem(
@@ -288,6 +292,8 @@ function ViewOrderDetails({
                       <h2 className="text-[25px] text-left text-qblack mb-2.5">
                         {store.storeName}
                       </h2>
+                      <p className="text-[15px]">Store Address: {store.storeAddress}</p>
+                      <p className="text-[15px] mb-[15px]">Store Phone Number:{store.storePhone}</p>
                       Status:{' '}
                       {orderDetails.cart.find(
                         (c: any) => c.storeId === store.storeId,
@@ -303,9 +309,11 @@ function ViewOrderDetails({
                           <select
                             id={`adminSelect-${store.storeName}`}
                             value={
-                              selectedCourers[store.storeId] || orderDetails.cart.find(
+                              selectedCourers[store.storeId] ||
+                              orderDetails.cart.find(
                                 (c: any) => c.storeId === store.storeId,
-                              ).agentId || ''
+                              ).agentId ||
+                              ''
                             }
                             onChange={(event) =>
                               handleAssignCourer(
